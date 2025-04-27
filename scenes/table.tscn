@@ -1,5 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://c1e2lx06a1phf"]
+[gd_scene load_steps=3 format=3 uid="uid://c1e2lx06a1phf"]
 
+[ext_resource type="Script" uid="uid://dierdpj500oyn" path="res://scenes/table.gd" id="1_eotx8"]
 [ext_resource type="Texture2D" uid="uid://dswcc20t8v3ni" path="res://assets/table.png" id="1_jd0nb"]
 
 [node name="Table" type="Control"]
@@ -9,7 +10,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-metadata/_edit_use_anchors_ = true
+script = ExtResource("1_eotx8")
 
 [node name="NinePatchRect" type="NinePatchRect" parent="."]
 layout_mode = 1

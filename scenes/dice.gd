@@ -94,6 +94,7 @@ func win():
 	
 func lose():
 	print("LOSE")
+	Services.dices.remove_dice(self)
 	queue_free()
 
 func on_throw_lose():

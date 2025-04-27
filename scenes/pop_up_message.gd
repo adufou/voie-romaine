@@ -15,5 +15,4 @@ func init_message(message: String):
 	%Message.text = message
 
 func _on_timer_timeout() -> void:
-	print('Pop up message timeout')
 	queue_free()
