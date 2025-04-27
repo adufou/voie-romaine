@@ -22,7 +22,7 @@ func _ready() -> void:
 
 func throw():
 	%AnimatedSprite2D.play("throw")
-	%Timer.start()
+	%ThrowRollTimer.start()
 
 func set_value():
 	%AnimatedSprite2D.animation = "white"
@@ -33,8 +33,10 @@ func set_value():
 	%AnimatedSprite2D.frame = value - 1
 	
 	var throw_number = "?" if (goal == 6 and tries == -1) else str(goal - tries + 1)
-	print("N°", throw_number, " of ", goal, " | Rolled ", value)
+	# print("N°", throw_number, " of ", goal, " | Rolled ", value)
 	
+	%ThrowInfo.text = "N°" + str(throw_number) + " of " + str(goal) + " | Rolled " + str(value)
+	%ThrowInfoTimer.start()
 	throw_resolve()
 
 func _on_timer_timeout() -> void:
@@ -98,4 +100,8 @@ func on_throw_lose():
 	
 func on_throw_win():
 	# print("THROW WIN")
+	Services.cash.pass_goal(goal)
 	Services.score.pass_goal(goal)
+
+func _on_throw_info_timer_timeout() -> void:
+	%ThrowInfo.text = ""

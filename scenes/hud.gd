@@ -1,7 +1,11 @@
 extends Control
 
 func _ready() -> void:
+	Services.cash.cash_changed.connect(on_cash_changed)
 	Services.score.score_changed.connect(on_score_changed)
+
+func on_cash_changed(new_cash: int):
+	%Cash.text = "$" + str(new_cash)
 
 func on_score_changed(new_score: int):
 	%Score.text = str(new_score)

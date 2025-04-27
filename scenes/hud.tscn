@@ -36,6 +36,11 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "0"
 
+[node name="Cash" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainerLeft"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "$0"
+
 [node name="ContainerMiddle" type="AspectRatioContainer" parent="MarginContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3

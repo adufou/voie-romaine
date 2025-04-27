@@ -109,12 +109,26 @@ unique_name_in_owner = true
 sprite_frames = SubResource("SpriteFrames_5b4eb")
 animation = &"white"
 
-[node name="Timer" type="Timer" parent="."]
+[node name="ThrowRollTimer" type="Timer" parent="."]
 unique_name_in_owner = true
 wait_time = 0.2
 one_shot = true
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="ThrowInfoTimer" type="Timer" parent="."]
+unique_name_in_owner = true
+one_shot = true
+
+[node name="ThrowInfo" type="Label" parent="."]
+unique_name_in_owner = true
+offset_left = -19.5
+offset_top = 62.0
+offset_right = 20.5
+offset_bottom = 85.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer (dev)" type="VBoxContainer" parent="."]
+visible = false
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
@@ -124,18 +138,19 @@ offset_right = 20.5
 offset_bottom = 48.0
 grow_horizontal = 2
 
-[node name="Goal" type="Label" parent="VBoxContainer"]
+[node name="Goal" type="Label" parent="VBoxContainer (dev)"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "6"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Tries" type="Label" parent="VBoxContainer"]
+[node name="Tries" type="Label" parent="VBoxContainer (dev)"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "∞"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
+[connection signal="timeout" from="ThrowRollTimer" to="." method="_on_timer_timeout"]
+[connection signal="timeout" from="ThrowInfoTimer" to="." method="_on_throw_info_timer_timeout"]

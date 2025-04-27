@@ -4,12 +4,12 @@ class_name Score
 
 signal score_changed(new_score)
 
-var score: int = 0:
+var _score: int = 0:
 	set(new_value):
-		score = new_value
-		score_changed.emit(score)
+		_score = new_value
+		score_changed.emit(_score)
 
 func pass_goal(goal: int):
 	var scored = 7 - goal
 	
-	score += scored
+	_score += scored
