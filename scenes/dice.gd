@@ -29,9 +29,10 @@ func set_value():
 	%AnimatedSprite2D.pause()
 	
 	value = randi_range(1,6)
+	
 	%AnimatedSprite2D.frame = value - 1
 	
-	var throw_number = "?" if goal == 6 else str(goal - tries + 1)
+	var throw_number = "?" if (goal == 6 and tries == -1) else str(goal - tries + 1)
 	print("N°", throw_number, " of ", goal, " | Rolled ", value)
 	
 	throw_resolve()
@@ -72,14 +73,12 @@ func reset():
 	throw()
 
 func throw_lose():
-	if (goal < 5):
-		goal += 1
-		tries = goal
-		
-	else:
-		goal = 6
-		tries = -1
-		
+	if (goal == 6 and tries > 0):
+		lose()
+	
+	goal += 1
+	tries = goal
+	
 	on_throw_lose()
 
 func throw_win():
@@ -88,6 +87,10 @@ func throw_win():
 func win():
 	print("WIN")
 	reset()
+	
+func lose():
+	print("LOSE")
+	queue_free()
 
 func on_throw_lose():
 	pass
