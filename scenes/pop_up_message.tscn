@@ -1,0 +1,32 @@
+[gd_scene load_steps=2 format=3 uid="uid://ompdxamo7dsk"]
+
+[ext_resource type="Script" uid="uid://1rpr3u23ly5q" path="res://scenes/pop_up_message.gd" id="1_uiqbl"]
+
+[node name="PopUpMessage" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_uiqbl")
+
+[node name="Timer" type="Timer" parent="."]
+unique_name_in_owner = true
+one_shot = true
+autostart = true
+
+[node name="Message" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -11.5
+offset_right = 20.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

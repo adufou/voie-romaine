@@ -2,6 +2,8 @@ extends Node2D
 
 class_name Dice
 
+@export var pop_up_message_scene: PackedScene # Make it a service if used in several places 
+
 var value: int
 var goal: int = 6:
 	set(new_value):
@@ -35,8 +37,8 @@ func set_value():
 	var throw_number = "?" if (goal == 6 and tries == -1) else str(goal - tries + 1)
 	# print("N°", throw_number, " of ", goal, " | Rolled ", value)
 	
-	%ThrowInfo.text = "N°" + str(throw_number) + " of " + str(goal) + " | Rolled " + str(value)
-	%ThrowInfoTimer.start()
+	pop_up_message("N°" + str(throw_number) + " of " + str(goal) + " | Rolled " + str(value))
+
 	throw_resolve()
 
 func _on_timer_timeout() -> void:
@@ -102,6 +104,12 @@ func on_throw_win():
 	# print("THROW WIN")
 	Services.cash.pass_goal(goal)
 	Services.score.pass_goal(goal)
+
+func pop_up_message(message: String):
+	var pop_up_message: PopUpMessage = pop_up_message_scene.instantiate()
+	pop_up_message.init_message(message)
+	
+	add_child(pop_up_message)
 
 func _on_throw_info_timer_timeout() -> void:
 	%ThrowInfo.text = ""
