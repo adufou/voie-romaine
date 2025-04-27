@@ -37,9 +37,8 @@ func set_value():
 	%AnimatedSprite2D.frame = value - 1
 	
 	var throw_number = "?" if (goal == 6 and tries == -1) else str(goal - tries + 1)
-	# print("N°", throw_number, " of ", goal, " | Rolled ", value)
 	
-	pop_up_message("N°" + str(throw_number) + " of " + str(goal) + " | Rolled " + str(value))
+	# pop_up_message("N°" + str(throw_number) + " of " + str(goal) + " | Rolled " + str(value))
 
 	throw_resolve()
 
@@ -60,7 +59,7 @@ func throw_resolve() -> void:
 		if (goal == 1 and value == 6): # Super beugnette
 			goal = 6
 			tries = -1
-			print("Super beugnette...")
+			pop_up_message("Super beugnette...")
 		
 		elif (tries > 1):
 			tries -= 1
@@ -68,7 +67,7 @@ func throw_resolve() -> void:
 		elif (tries == 1):
 			if (value == goal + 1): # Beugnette
 				tries = goal
-				print("Beugnette !")
+				pop_up_message("Beugnette !")
 				return
 			
 			throw_lose()
@@ -92,21 +91,19 @@ func throw_win():
 	on_throw_win()
 
 func win():
-	print("WIN")
+	pop_up_message("WIN")
 	Services.cash.add_cash(gold_reward)
 	reset()
 	
 func lose():
-	print("LOSE")
+	pop_up_message("LOSE")
 	Services.dices.remove_dice(self)
 	queue_free()
 
 func on_throw_lose():
 	pass
-	# print("THROW LOSE")
 	
 func on_throw_win():
-	# print("THROW WIN")
 	add_gold_reward(goal)
 	Services.score.pass_goal(goal)
 
@@ -117,8 +114,9 @@ func add_gold_reward(goal):
 func pop_up_message(message: String):
 	var pop_up_message: PopUpMessage = pop_up_message_scene.instantiate()
 	pop_up_message.init_message(message)
+	pop_up_message.position = position
 	
-	add_child(pop_up_message)
+	add_sibling(pop_up_message)
 
 func _on_throw_info_timer_timeout() -> void:
 	%ThrowInfo.text = ""
