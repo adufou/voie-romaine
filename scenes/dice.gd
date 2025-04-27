@@ -33,13 +33,14 @@ func set_value():
 	
 	print(value)
 	
-	resolve()
+	throw_resolve()
 
 func _on_timer_timeout() -> void:
 	set_value()
 
-func resolve() -> void:
+func throw_resolve() -> void:
 	if (value == goal):
+		throw_win()
 		if (goal == 1):
 			win()
 			return
@@ -52,7 +53,7 @@ func resolve() -> void:
 			tries -= 1
 				
 		elif (tries == 1):
-			lose()
+			throw_lose()
 			return
 
 func reset():
@@ -60,7 +61,7 @@ func reset():
 	tries = -1
 	throw()
 
-func lose():
+func throw_lose():
 	if (goal < 5):
 		goal += 1
 		tries = goal
@@ -69,14 +70,18 @@ func lose():
 		goal = 6
 		tries = -1
 		
-	on_lose()
+	on_throw_lose()
+
+func throw_win():
+	on_throw_win()
 
 func win():
-	on_win()
+	print("WIN")
 	reset()
 
-func on_lose():
-	print("LOSE")
+func on_throw_lose():
+	print("THROW LOSE")
 	
-func on_win():
-	print("WIN")
+func on_throw_win():
+	print("THROW WIN")
+	Services.score.pass_goal(goal)

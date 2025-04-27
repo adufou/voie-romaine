@@ -25,22 +25,37 @@ theme_override_constants/margin_right = 32
 theme_override_constants/margin_bottom = 32
 metadata/_edit_use_anchors_ = true
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
 layout_mode = 2
 
-[node name="SpawnDiceButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="VBoxContainerLeft" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Score" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainerLeft"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0"
+
+[node name="ContainerMiddle" type="AspectRatioContainer" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VBoxContainerRight" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="SpawnDiceButton" type="Button" parent="MarginContainer/HBoxContainer/VBoxContainerRight"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 0
 text = "Spawn Dices"
 
-[node name="ThrowDicesButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="ThrowDicesButton" type="Button" parent="MarginContainer/HBoxContainer/VBoxContainerRight"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 0
 text = "Throw Dices"
 
-[connection signal="pressed" from="MarginContainer/VBoxContainer/SpawnDiceButton" to="." method="_on_spawn_dice_button_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/ThrowDicesButton" to="." method="_on_throw_dices_button_pressed"]
+[connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainerRight/SpawnDiceButton" to="." method="_on_spawn_dice_button_pressed"]
+[connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainerRight/ThrowDicesButton" to="." method="_on_throw_dices_button_pressed"]
