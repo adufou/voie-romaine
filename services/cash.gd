@@ -9,10 +9,8 @@ var _cash: int = 0:
 		_cash = new_value
 		cash_changed.emit(_cash)
 
-func pass_goal(goal: int):
-	var cashed_out = 7 - goal
-	
-	_cash += cashed_out
+func add_cash(added_cash: int):	
+	_cash += added_cash
 
 func use_cash(quantity: int):
 	_cash -= quantity

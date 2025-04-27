@@ -9,6 +9,8 @@ var goal: int = 6:
 	set(new_value):
 		%Goal.text = str(new_value)
 		goal = new_value
+		
+var gold_reward: int = 0
 
 var tries: int = -1: # -1 => Infinite
 	set(new_value):
@@ -74,6 +76,7 @@ func throw_resolve() -> void:
 func reset():
 	goal = 6
 	tries = -1
+	gold_reward = 0
 	throw()
 
 func throw_lose():
@@ -90,6 +93,7 @@ func throw_win():
 
 func win():
 	print("WIN")
+	Services.cash.add_cash(gold_reward)
 	reset()
 	
 func lose():
@@ -103,8 +107,12 @@ func on_throw_lose():
 	
 func on_throw_win():
 	# print("THROW WIN")
-	Services.cash.pass_goal(goal)
+	add_gold_reward(goal)
 	Services.score.pass_goal(goal)
+
+func add_gold_reward(goal):
+	var reward = 7 - goal
+	gold_reward += reward
 
 func pop_up_message(message: String):
 	var pop_up_message: PopUpMessage = pop_up_message_scene.instantiate()
