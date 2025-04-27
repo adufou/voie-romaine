@@ -31,7 +31,8 @@ func set_value():
 	value = randi_range(1,6)
 	%AnimatedSprite2D.frame = value - 1
 	
-	print(value)
+	var throw_number = "?" if goal == 6 else str(goal - tries + 1)
+	print("N°", throw_number, " of ", goal, " | Rolled ", value)
 	
 	throw_resolve()
 
@@ -49,12 +50,21 @@ func throw_resolve() -> void:
 		tries = goal
 		
 	else:
-		if (tries > 1):
+		if (goal == 1 and value == 6): # Super beugnette
+			goal = 6
+			tries = -1
+			print("Super beugnette...")
+		
+		elif (tries > 1):
 			tries -= 1
 				
 		elif (tries == 1):
+			if (value == goal + 1): # Beugnette
+				tries = goal
+				print("Beugnette !")
+				return
+			
 			throw_lose()
-			return
 
 func reset():
 	goal = 6
@@ -80,8 +90,9 @@ func win():
 	reset()
 
 func on_throw_lose():
-	print("THROW LOSE")
+	pass
+	# print("THROW LOSE")
 	
 func on_throw_win():
-	print("THROW WIN")
+	# print("THROW WIN")
 	Services.score.pass_goal(goal)

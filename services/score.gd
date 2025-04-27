@@ -12,6 +12,4 @@ var score: int = 0:
 func pass_goal(goal: int):
 	var scored = 7 - goal
 	
-	print('goal ', goal, ' | scored ', scored)
-	
 	score += scored
