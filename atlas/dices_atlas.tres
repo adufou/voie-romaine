@@ -1,0 +1,6 @@
+[gd_resource type="AtlasTexture" load_steps=2 format=3 uid="uid://rn6k15wnjjkw"]
+
+[ext_resource type="Texture2D" uid="uid://kq561dqta3vv" path="res://assets/six sided die.png" id="1_bd24g"]
+
+[resource]
+atlas = ExtResource("1_bd24g")
