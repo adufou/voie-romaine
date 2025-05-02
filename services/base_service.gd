@@ -75,7 +75,7 @@ func start() -> void:
 #########################################################
 
 ## Réinitialise l'état du service
-func reset(with_persistence: bool = false) -> void:
+func perform_reset(with_persistence: bool = false) -> void:
     print("Réinitialisation du service: %s (persistance: %s)" % [service_name, with_persistence])
     
     # Par défaut, réinitialise l'état à implémenter dans les sous-classes
