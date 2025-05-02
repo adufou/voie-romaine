@@ -8,17 +8,21 @@ Ces tâches sont triées dans un ordre qui garantit de ne pas être bloqué par 
 **Dépend de :** Aucune  
 **Estimation :** 2 heures  
 **Sources :** `_specs_/game_design_incremental.md`, `implementation_services.md`
+**Statut :** ✅ Terminée
 
 ### Description
 Analyser la structure existante du projet, notamment le système de dés (`Dices`), de monnaie (`Cash`) et de score (`Score`) pour comprendre comment ils sont implémentés et comment les intégrer dans la nouvelle architecture.
 
 ### Critères de validation
-- [ ] Documentation des classes existantes et de leur fonctionnement
-- [ ] Identification des points d'intégration avec la nouvelle architecture
-- [ ] Liste des modifications nécessaires pour assurer la compatibilité
+- [x] Documentation des classes existantes et de leur fonctionnement
+- [x] Identification des points d'intégration avec la nouvelle architecture
+- [x] Liste des modifications nécessaires pour assurer la compatibilité
 
 ### Notes techniques
 Examiner particulièrement la classe `Dices` qui gère le positionnement des dés sur la table.
+
+### Résultat
+La documentation complète se trouve dans `_todo_/_tasks_infos_/ARCH-01_analyse_structure.md`.
 
 ---
 

@@ -4,6 +4,7 @@
 Jeu incrémental basé sur la Voie Romaine (lancer de dé pour obtenir 6→5→4→3→2→1 avec règles de Beugnette). Progression par améliorations, types de dés et système de prestige.
 
 ## Architecture (Priorité 1)
+- [x] Analyse de la structure existante
 - [ ] Implémenter BaseService et système d'Autoload Services
 - [ ] Configurer la sauvegarde/chargement
 - [ ] Intégrer les systèmes existants (Cash, Score, Dices)
