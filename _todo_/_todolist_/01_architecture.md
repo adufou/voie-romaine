@@ -32,15 +32,19 @@ La documentation complète se trouve dans `_todo_/_tasks_infos_/ARCH-01_analyse_
 **Dépend de :** ARCH-01  
 **Estimation :** 3 heures  
 **Sources :** `implementation_base_service.md`, `implementation_services.md`
+**Statut :** ✅ Terminée
 
 ### Description
 Créer la classe de base `BaseService` qui sera héritée par tous les services du jeu, avec le système d'initialisation en trois phases et la gestion de sauvegarde/chargement.
 
 ### Critères de validation
-- [ ] Méthodes `initialize()`, `setup_dependencies()` et `start()` implémentées
-- [ ] Système de signaux pour la communication entre services
-- [ ] Méthodes `get_save_data()` et `load_save_data()` pour la persistance
-- [ ] Tests de fonctionnement avec un service simple
+- [x] Méthodes `initialize()`, `setup_dependencies()` et `start()` implémentées
+- [x] Système de signaux pour la communication entre services
+- [x] Méthodes `get_save_data()` et `load_save_data()` pour la persistance
+- [x] Structure de services avec logs et gestion d'erreurs
+
+### Résultat
+La documentation complète se trouve dans `_todo_/_tasks_infos_/ARCH-02_implementation_base_service.md`.
 
 ### Notes techniques
 ```gdscript

@@ -5,7 +5,7 @@ Jeu incrémental basé sur la Voie Romaine (lancer de dé pour obtenir 6→5→4
 
 ## Architecture (Priorité 1)
 - [x] Analyse de la structure existante
-- [ ] Implémenter BaseService et système d'Autoload Services
+- [x] Implémenter BaseService et système d'Autoload Services
 - [ ] Configurer la sauvegarde/chargement
 - [ ] Intégrer les systèmes existants (Cash, Score, Dices)
 
