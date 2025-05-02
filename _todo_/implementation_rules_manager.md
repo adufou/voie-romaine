@@ -41,17 +41,14 @@ func set_rules(rules: Array) -> void:
     rules_changed.emit()
 
 # Méthodes pour résoudre les lancers
-func resolve_throw(dice: Dice, value: int) -> Dictionary:
-    var result = {
-        "new_goal": dice.goal,
-        "new_tries": dice.tries,
-        "gold_reward": 0,
-        "messages": [],
-        "special_events": []
-    }
+func resolve_throw(dice: Dice, value: int) -> ThrowResult:
+    # Créer un résultat initial basé sur l'état actuel du dé
+    var result = ThrowResult.new(dice.goal, dice.tries)
     
+    # Appliquer chaque règle, qui met à jour le résultat
     for rule in active_rules:
-        rule.apply(dice, value, result)
+        if rule.is_applicable(dice, value, result):
+            rule.apply(dice, value, result)
     
     return result
 
@@ -94,8 +91,15 @@ extends Resource
 
 class_name DiceRule
 
-func apply(dice: Dice, value: int, result: Dictionary) -> void:
-    pass # À implémenter dans les classes dérivées
+func is_applicable(dice: Dice, value: int, result: ThrowResult) -> bool:
+    return false  # À surcharger dans les classes enfants
+
+func apply(dice: Dice, value: int, result: ThrowResult) -> void:
+    # À surcharger dans les classes enfants
+    result.rule_applied(get_rule_name())
+
+func get_rule_name() -> String:
+    return "BaseRule"
 ```
 
 ### 3. Règles standards
@@ -107,13 +111,15 @@ extends DiceRule
 
 class_name StandardGoalRule
 
-func apply(dice: Dice, value: int, result: Dictionary) -> void:
-    if value == dice.goal:
-        # Règle standard - même valeur que goal
-        result.new_goal = dice.goal - 1 if dice.goal > 1 else 6
-        result.new_tries = result.new_goal
-        result.gold_reward += (7 - dice.goal)
-        result.messages.append("Goal!")
+func is_applicable(dice: Dice, value: int, result: ThrowResult) -> bool:
+    return value == dice.goal
+
+func apply(dice: Dice, value: int, result: ThrowResult) -> void:
+    # Règle standard - même valeur que goal
+    result.new_goal = dice.goal - 1 if dice.goal > 1 else 6
+    result.new_tries = result.new_goal
+    result.add_gold(7 - dice.goal)
+    result.add_message("Goal!")
 ```
 
 **Fichier:** `/services/rules/beugnette_rule.gd`
@@ -123,10 +129,12 @@ extends DiceRule
 
 class_name BeugnetteRule
 
-func apply(dice: Dice, value: int, result: Dictionary) -> void:
-    if dice.tries == 1 and value == dice.goal + 1:
-        result.new_tries = dice.goal
-        result.messages.append("Beugnette!")
+func is_applicable(dice: Dice, value: int, result: ThrowResult) -> bool:
+    return dice.tries == 1 and value == dice.goal + 1
+
+func apply(dice: Dice, value: int, result: ThrowResult) -> void:
+    result.new_tries = dice.goal
+    result.add_message("Beugnette!")
 ```
 
 **Fichier:** `/services/rules/super_beugnette_rule.gd`
@@ -136,11 +144,13 @@ extends DiceRule
 
 class_name SuperBeugnetteRule
 
-func apply(dice: Dice, value: int, result: Dictionary) -> void:
-    if dice.goal == 1 and value == 6:
-        result.new_goal = 6
-        result.new_tries = -1
-        result.messages.append("Super beugnette...")
+func is_applicable(dice: Dice, value: int, result: ThrowResult) -> bool:
+    return dice.goal == 1 and value == 6
+
+func apply(dice: Dice, value: int, result: ThrowResult) -> void:
+    result.new_goal = 6
+    result.new_tries = -1
+    result.add_message("Super beugnette...")
 ```
 
 ### 4. Règles pour challenges (exemples)
@@ -152,11 +162,46 @@ extends DiceRule
 
 class_name GeneralizedSuperBeugnetteRule
 
-func apply(dice: Dice, value: int, result: Dictionary) -> void:
-    if value == 6:  # Peut se produire à n'importe quel goal
-        result.new_goal = 6
-        result.new_tries = -1
-        result.messages.append("Super beugnette généralisée!")
+func is_applicable(dice: Dice, value: int, result: ThrowResult) -> bool:
+    return value == 6  # Peut se produire à n'importe quel goal
+
+func apply(dice: Dice, value: int, result: ThrowResult) -> void:
+    result.new_goal = 6
+    result.new_tries = -1
+    result.add_message("Super beugnette généralisée!")
+```
+
+### 5. Classe ThrowResult
+
+**Fichier:** `/services/rules/throw_result.gd`
+
+```gdscript
+class_name ThrowResult
+extends RefCounted
+
+var new_goal: int  # Le nouveau goal après application des règles
+var new_tries: int  # Le nouveau nombre d'essais après application des règles
+var gold_reward: int = 0  # Récompense en or
+var messages: Array[String] = []  # Messages à afficher
+var special_effects: Dictionary = {}  # Effets spéciaux (animations, sons, etc.)
+var rules_applied: Array[String] = []  # Liste des règles appliquées pour le debug
+
+# Initialise le résultat avec les valeurs actuelles du dé
+func _init(initial_goal: int, initial_tries: int) -> void:
+    new_goal = initial_goal
+    new_tries = initial_tries
+
+# Ajoute un message à afficher
+func add_message(message: String) -> void:
+    messages.append(message)
+
+# Ajoute de l'or à la récompense
+func add_gold(amount: int) -> void:
+    gold_reward += amount
+
+# Marque qu'une règle a été appliquée
+func rule_applied(rule_name: String) -> void:
+    rules_applied.append(rule_name)
 ```
 
 ## Modifications à apporter au code existant
@@ -233,17 +278,25 @@ Services.rules_manager.apply_challenge_generalized_super_beugnette()
 **Fichier:** `/services/rules/express_multiplier_rule.gd`
 
 ```gdscript
-extends DiceRule
-
 class_name ExpressMultiplierRule
+extends Rule
 
-func apply(dice: Dice, value: int, result: Dictionary) -> void:
-    if value == dice.goal:
-        result.special_events.append({
-            "type": "express_multiplier",
-            "value": 1.1,
-            "duration": 30
-        })
+func is_applicable(dice: Dice, value: int, result: ThrowResult) -> bool:
+    return value == result.new_goal
+
+func apply(dice: Dice, value: int, result: ThrowResult) -> void:
+    # Ajouter un effet spécial
+    result.special_effects["express_multiplier"] = {
+        "value": 1.1,
+        "duration": 30
+    }
+    # Ajouter un message
+    result.add_message("Voie Express activée ! Multiplicateur x1.1")
+    # Marquer que la règle a été appliquée
+    result.rule_applied(get_rule_name())
+
+func get_rule_name() -> String:
+    return "ExpressMultiplier"
 ```
 
 ## Avantages du nouveau système
