@@ -12,7 +12,8 @@ grow_vertical = 2
 script = ExtResource("1_ahhtf")
 metadata/_edit_use_anchors_ = true
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="InGameHUD" type="MarginContainer" parent="."]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -25,42 +26,73 @@ theme_override_constants/margin_right = 32
 theme_override_constants/margin_bottom = 32
 metadata/_edit_use_anchors_ = true
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="InGameHUD"]
 layout_mode = 2
 
-[node name="VBoxContainerLeft" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+[node name="VBoxContainerLeft" type="VBoxContainer" parent="InGameHUD/HBoxContainer"]
 layout_mode = 2
 
-[node name="Score" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainerLeft"]
+[node name="Score" type="Label" parent="InGameHUD/HBoxContainer/VBoxContainerLeft"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "0"
 
-[node name="Cash" type="Label" parent="MarginContainer/HBoxContainer/VBoxContainerLeft"]
+[node name="Cash" type="Label" parent="InGameHUD/HBoxContainer/VBoxContainerLeft"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "$0"
 
-[node name="ContainerMiddle" type="AspectRatioContainer" parent="MarginContainer/HBoxContainer"]
+[node name="ContainerMiddle" type="AspectRatioContainer" parent="InGameHUD/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="VBoxContainerRight" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+[node name="VBoxContainerRight" type="VBoxContainer" parent="InGameHUD/HBoxContainer"]
 layout_mode = 2
 
-[node name="SpawnDiceButton" type="Button" parent="MarginContainer/HBoxContainer/VBoxContainerRight"]
+[node name="OpenShopButton" type="Button" parent="InGameHUD/HBoxContainer/VBoxContainerRight"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 0
-text = "Spawn Dices"
+text = "OpenShop"
 
-[node name="ThrowDicesButton" type="Button" parent="MarginContainer/HBoxContainer/VBoxContainerRight"]
+[node name="ThrowDicesButton" type="Button" parent="InGameHUD/HBoxContainer/VBoxContainerRight"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 0
 text = "Throw Dices"
 
-[connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainerRight/SpawnDiceButton" to="." method="_on_spawn_dice_button_pressed"]
-[connection signal="pressed" from="MarginContainer/HBoxContainer/VBoxContainerRight/ThrowDicesButton" to="." method="_on_throw_dices_button_pressed"]
+[node name="ShopPanel" type="Panel" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="ShopPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 32
+
+[node name="CloseShopButton" type="Button" parent="ShopPanel/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 32
+text = "X"
+
+[connection signal="pressed" from="InGameHUD/HBoxContainer/VBoxContainerRight/OpenShopButton" to="." method="_on_open_shop_button_pressed"]
+[connection signal="pressed" from="InGameHUD/HBoxContainer/VBoxContainerRight/ThrowDicesButton" to="." method="_on_throw_dices_button_pressed"]
+[connection signal="pressed" from="ShopPanel/MarginContainer/CloseShopButton" to="." method="_on_close_shop_button_pressed"]

@@ -91,7 +91,7 @@ func throw_win():
 	on_throw_win()
 
 func win():
-	pop_up_message("WIN")
+	pop_up_message("$" + str(gold_reward))
 	Services.cash.add_cash(gold_reward)
 	reset()
 	

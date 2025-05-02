@@ -1,5 +1,7 @@
 extends Control
 
+
+
 func _ready() -> void:
 	Services.cash.cash_changed.connect(on_cash_changed)
 	Services.score.score_changed.connect(on_score_changed)
@@ -15,3 +17,12 @@ func _on_spawn_dice_button_pressed() -> void:
 
 func _on_throw_dices_button_pressed() -> void:
 	Services.dices.throw_dices()
+
+
+func _on_open_shop_button_pressed() -> void:
+	%InGameHUD.hide()
+	%ShopPanel.show()
+	
+func _on_close_shop_button_pressed() -> void:
+	%ShopPanel.hide()
+	%InGameHUD.show()
