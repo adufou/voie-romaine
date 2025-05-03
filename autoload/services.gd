@@ -5,6 +5,9 @@ const VERSION: String = "0.0.1"
 
 # Préchargement des dépendances
 const SaveManagerClass = preload("res://utils/save_manager.gd")
+const CashServiceClass = preload("res://services/cash/cash_service.gd")
+const ScoreServiceClass = preload("res://services/score/score_service.gd")
+const DiceServiceClass = preload("res://services/dices/dice_service.gd")
 
 # Signaux globaux
 signal services_ready
@@ -13,10 +16,15 @@ signal save_game_completed
 signal load_game_started
 signal load_game_completed(success)
 
-# Services existants
+# Services existants (pour la rétrocompatibilité)
 var cash: Cash 
 var score: Score 
 var dices: Dices 
+
+# Services intégrés avec BaseService
+var cash_service: CashService
+var score_service: ScoreService
+var dice_service: DiceService
 
 # Nouveaux services (à instancier plus tard)
 var game_data = null # GameDataService
@@ -45,8 +53,7 @@ func _ready() -> void:
 	_start_services()
 	
 	# Étape 5: Connexions entre services existants et nouveaux
-	# Cette étape sera activée plus tard quand les nouveaux services seront implémentés
-	# _connect_signals()
+	_connect_signals()
 	
 	is_initialized = true
 	print("Système de services initialisé avec succès")
@@ -56,10 +63,15 @@ func _ready() -> void:
 func _create_services() -> void:
 	print("Création des services...")
 	
-	# Services existants
+	# Services existants (pour la rétrocompatibilité)
 	cash = Cash.new()
 	score = Score.new()
 	dices = preload("res://services/dices/dices.tscn").instantiate()
+	
+	# Services intégrés avec BaseService
+	cash_service = CashServiceClass.new()
+	score_service = ScoreServiceClass.new()
+	dice_service = DiceServiceClass.new()
 	
 	# Les nouveaux services seront ajoutés ici dans une future tâche
 	# game_data = GameDataService.new()
@@ -72,6 +84,11 @@ func _create_services() -> void:
 	add_child(score)
 	add_child(dices)
 	
+	# Ajouter les nouveaux services BaseService
+	add_child(cash_service)
+	add_child(score_service)
+	add_child(dice_service)
+	
 	# Ajouter les nouveaux services quand ils seront implémentés
 	# add_child(game_data)
 	# add_child(rules)
@@ -82,8 +99,10 @@ func _create_services() -> void:
 func _initialize_services() -> void:
 	print("Initialisation des services...")
 	
-	# Les services hérités de BaseService auront une méthode initialize()
-	# Les services existants seront traités différemment car ils n'héritent pas de BaseService
+	# Les services hérités de BaseService ont une méthode initialize()
+	cash_service.initialize()
+	score_service.initialize()
+	dice_service.initialize()
 	
 	# Les nouveaux services seront initialisés ici dans une future tâche
 	# game_data.initialize()
@@ -95,8 +114,15 @@ func _initialize_services() -> void:
 func _setup_dependencies() -> void:
 	print("Configuration des dépendances entre services...")
 	
-	# Les services hérités de BaseService auront une méthode setup_dependencies()
-	# Les dépendances seront configurées ici dans une future tâche
+	# Pour DiceService, nous devons lui fournir une référence à la table de jeu
+	# Cette référence sera mise à jour lorsque la table sera disponible
+	dice_service.setup_dependencies({})
+	
+	# Pas de dépendances pour CashService et ScoreService pour le moment
+	cash_service.setup_dependencies({})
+	score_service.setup_dependencies({})
+	
+	# Les autres services seront configurés dans une future tâche
 	# rules.setup_dependencies({})
 	# game_data.setup_dependencies({})
 	# upgrades.setup_dependencies({
@@ -112,8 +138,12 @@ func _setup_dependencies() -> void:
 func _start_services() -> void:
 	print("Démarrage des services...")
 	
-	# Les services hérités de BaseService auront une méthode start()
-	# Les services seront démarrés ici dans une future tâche
+	# Démarrage des services BaseService
+	cash_service.start()
+	score_service.start()
+	dice_service.start()
+	
+	# Les autres services seront démarrés dans une future tâche
 	# game_data.start()
 	# rules.start()
 	# upgrades.start()
@@ -123,16 +153,24 @@ func _start_services() -> void:
 func _connect_signals() -> void:
 	print("Connexion des signaux entre services...")
 	
-	# Les connexions seront ajoutées ici dans une future tâche
+	# Connecter les signaux des nouveaux services aux anciens pour la rétrocompatibilité
+	cash_service.cash_changed.connect(_on_cash_service_changed)
+	score_service.score_changed.connect(_on_score_service_changed)
+	
+	# Les autres connexions seront ajoutées dans une future tâche
 	# game_data.gold_changed.connect(_on_gold_changed)
 	# game_data.score_changed.connect(_on_score_changed)
 
 # Handlers pour assurer la compatibilité avec le système existant
-func _on_gold_changed(new_gold: int) -> void:
-	cash.set_amount(new_gold)
+func _on_cash_service_changed(new_cash: int) -> void:
+	# Mettre à jour l'ancien service cash pour la rétrocompatibilité
+	cash._cash = new_cash
+	cash.emit_signal("cash_changed", new_cash)
 	
-func _on_score_changed(new_score: int) -> void:
-	score.set_amount(new_score)
+func _on_score_service_changed(new_score: int) -> void:
+	# Mettre à jour l'ancien service score pour la rétrocompatibilité
+	score._score = new_score
+	score.emit_signal("score_changed", new_score)
 
 # Fonctions de sauvegarde et chargement
 func save_game() -> void:
@@ -151,12 +189,17 @@ func save_game() -> void:
 		"services": {}
 	}
 	
-	# Collecte des données des services existants
+	# Collecte des données des services BaseService
+	save_data["services"]["cash_service"] = cash_service.get_save_data()
+	save_data["services"]["score_service"] = score_service.get_save_data()
+	save_data["services"]["dice_service"] = dice_service.get_save_data()
+	
+	# Pour la rétrocompatibilité, aussi enregistrer dans l'ancien format
 	save_data["services"]["cash"] = { "amount": cash._cash }
 	save_data["services"]["score"] = { "score": score._score }
 	save_data["services"]["dices"] = dices.get_save_data() if "get_save_data" in dices else {}
 	
-	# Les nouveaux services utiliseront leur méthode get_save_data()
+	# Les autres nouveaux services utiliseront leur méthode get_save_data()
 	# save_data["services"]["game_data"] = game_data.get_save_data()
 	# save_data["services"]["rules"] = rules.get_save_data()
 	# save_data["services"]["upgrades"] = upgrades.get_save_data()
@@ -193,27 +236,40 @@ func load_game() -> bool:
 		if "services" in load_data:
 			var services_data = load_data["services"]
 			
-			# Mise à jour des services existants
-			if "cash" in services_data:
-				cash._cash = services_data["cash"].get("amount", 0)
-				cash.emit_signal("changed")  # Forcer l'émission du signal pour mettre à jour l'UI
+			# Chargement des données dans les services BaseService
+			if "cash_service" in services_data:
+				cash_service.load_save_data(services_data["cash_service"])
+			elif "cash" in services_data:
+				# Fallback vers l'ancien format
+				cash_service.set_cash(services_data["cash"].get("amount", 0))
 			
+			if "score_service" in services_data:
+				score_service.load_save_data(services_data["score_service"])
+			elif "score" in services_data:
+				# Fallback vers l'ancien format
+				score_service.set_score(services_data["score"].get("score", 0))
+			
+			if "dice_service" in services_data:
+				dice_service.load_save_data(services_data["dice_service"])
+			
+			# Mise à jour des services existants pour la rétrocompatibilité
 			if "score" in services_data:
 				score._score = services_data["score"].get("score", 0)
-				score.emit_signal("changed")  # Forcer l'émission du signal pour mettre à jour l'UI
-				
-			if "dices" in services_data and "load_save_data" in dices:
-				dices.load_save_data(services_data["dices"])
+				score.emit_signal("score_changed", score._score)  # Forcer l'émission du signal
 			
-			# Les nouveaux services utiliseront leur méthode load_save_data()
+			if "dices" in services_data:
+				if "load_save_data" in dices:
+					dices.load_save_data(services_data["dices"])
+			
+			# Les autres nouveaux services utiliseront leur méthode load_save_data()
 			# if "game_data" in services_data:
-			#     game_data.load_save_data(services_data["game_data"])
+			# 	game_data.load_save_data(services_data["game_data"])
 			# if "rules" in services_data:
-			#     rules.load_save_data(services_data["rules"])
+			# 	rules.load_save_data(services_data["rules"])
 			# if "upgrades" in services_data:
-			#     upgrades.load_save_data(services_data["upgrades"])
+			# 	upgrades.load_save_data(services_data["upgrades"])
 			# if "game" in services_data:
-			#     game.load_save_data(services_data["game"])
+			# 	game.load_save_data(services_data["game"])
 			# if "upgrades" in services_data:
 			#     upgrades.load_save_data(services_data["upgrades"])
 			# if "game" in services_data:

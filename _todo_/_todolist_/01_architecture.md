@@ -125,15 +125,19 @@ Utiliser `JSON.stringify()` pour sérialiser les données et `JSON.parse()` pour
 **Dépend de :** ARCH-03, ARCH-04  
 **Estimation :** 6 heures  
 **Sources :** `implementation_services.md`, `implementation_game_manager.md`
+**Statut :** ✅ Terminée
 
 ### Description
 Intégrer les systèmes existants (Cash, Score, Dices) dans la nouvelle architecture de services, assurant une transition fluide et une compatibilité complète.
 
 ### Critères de validation
-- [ ] Systèmes existants accessibles via le singleton Services
-- [ ] Compatibilité bidirectionnelle entre anciens et nouveaux systèmes
-- [ ] Signaux connectés entre les services pour maintenir la synchronisation
-- [ ] Tests d'intégration complets
+- [x] Systèmes existants accessibles via le singleton Services
+- [x] Compatibilité bidirectionnelle entre anciens et nouveaux systèmes
+- [x] Signaux connectés entre les services pour maintenir la synchronisation
+- [x] Tests d'intégration complets
+
+### Résultat
+La documentation complète se trouve dans `_todo_/_tasks_infos_/ARCH-05_integration_systemes_existants.md`.
 
 ### Notes techniques
 ```gdscript

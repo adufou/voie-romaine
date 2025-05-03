@@ -7,7 +7,7 @@ Jeu incrémental basé sur la Voie Romaine (lancer de dé pour obtenir 6→5→4
 - [x] Analyse de la structure existante
 - [x] Implémenter BaseService et système d'Autoload Services
 - [x] Configurer la sauvegarde/chargement
-- [ ] Intégrer les systèmes existants (Cash, Score, Dices)
+- [x] Intégrer les systèmes existants (Cash, Score, Dices) - Terminé le 03/05/2025
 
 ## Services Core (Priorité 1)
 - [ ] GameDataService (or, score, statistiques)
