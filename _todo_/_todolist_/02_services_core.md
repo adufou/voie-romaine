@@ -2,7 +2,7 @@
 
 Ces tâches concernent l'implémentation des services principaux du jeu, triées dans un ordre qui garantit de ne pas être bloqué par des dépendances.
 
-## SERV-01: Implémentation du GameDataService
+## SERV-01: Implémentation du StatisticsService
 
 **Priorité :** Haute  
 **Dépend de :** ARCH-02, ARCH-03  
@@ -10,33 +10,47 @@ Ces tâches concernent l'implémentation des services principaux du jeu, triées
 **Sources :** `implementation_data_service.md`, `implementation_game_manager.md`
 
 ### Description
-Implémenter le service de données de jeu qui gérera toutes les ressources (or, score) et statistiques. Ce service est fondamental car la plupart des autres services en dépendront.
+Implémenter un service spécialisé pour la gestion des statistiques de jeu. Ce service suivra les événements du jeu et maintiendra un historique des statistiques importantes, tout en respectant le principe de responsabilité unique.
 
 ### Critères de validation
-- [ ] Structure de données pour l'or, le score et autres ressources
-- [ ] Méthodes pour ajouter/retirer des ressources avec émission de signaux
-- [ ] Stockage des statistiques de jeu (lancers, buts atteints, etc.)
+- [ ] Organisation des statistiques en catégories (jeu, dices, économie, accomplissements)
+- [ ] Système d'enregistrement et de suivi des statistiques de jeu
+- [ ] Intégration avec les services existants (CashService, ScoreService, DiceService)
+- [ ] Méthodes dédiées pour suivre les événements de jeu
 - [ ] Implémentation des méthodes de sauvegarde/chargement
-- [ ] Réinitialisation correcte lors d'un prestige
+- [ ] Suivi du temps de jeu
 
 ### Notes techniques
 ```gdscript
-# /services/game_data_service.gd
+# /services/statistics/statistics_service.gd
 extends BaseService
-class_name GameDataService
+class_name StatisticsService
 
-signal gold_changed(new_amount)
-signal score_changed(new_amount)
-signal relics_changed(new_amount)
+# Signal émis quand une statistique est mise à jour
+signal statistic_changed(category, name, value)
 
-# --- Données économiques ---
-var gold: int = 0
-var score: int = 0
-var total_gold_earned: int = 0
+# Dépendances de services
+var cash_service: CashService = null
+var score_service: ScoreService = null
+var dice_service: DiceService = null
 
-# --- Données de prestige ---
-var relics: int = 0
-var talent_points: int = 0
+# Statistiques par catégories
+var _statistics: Dictionary = {
+    "game": {
+        "total_games_played": 0,
+        "total_time_played": 0.0,
+        "best_score": 0
+    },
+    "dice": {
+        "total_throws": 0,
+        "successful_throws": 0,
+        "beugnettes": 0
+    },
+    "economy": {
+        "total_gold_earned": 0,
+        "total_gold_spent": 0
+    }
+}
 ```
 
 ---

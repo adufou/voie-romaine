@@ -11,10 +11,10 @@ Jeu incrémental basé sur la Voie Romaine (lancer de dé pour obtenir 6→5→4
 - [x] Système d'enregistrement et diagnostic (Logger) - Terminé le 03/05/2025
 
 ## Services Core (Priorité 1)
-- [ ] GameDataService (or, score, statistiques)
-- [ ] RulesService (règles de jeu, résolution des lancers)
-- [ ] UpgradeService (améliorations achetables)
-- [ ] GameService (coordination globale)
+- [x] StatisticsService (statistiques de jeu) - Terminé le 03/05/2025
+- [x] RulesService (règles de jeu, résolution des lancers) - Terminé le 03/05/2025
+- [x] UpgradeService (améliorations achetables) - Terminé le 03/05/2025
+- [x] GameService (coordination globale) - Terminé le 03/05/2025
 
 ## Gameplay de Base (Priorité 2)
 - [ ] Système de dés Voie Romaine (6→5→4→3→2→1)
