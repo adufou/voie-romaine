@@ -8,7 +8,11 @@ Jeu incrémental basé sur la Voie Romaine (lancer de dé pour obtenir 6→5→4
 - [x] Implémenter BaseService et système d'Autoload Services
 - [x] Configurer la sauvegarde/chargement - Terminé le 03/05/2025
 - [x] Intégrer les systèmes existants (Cash, Score, Dices) - Terminé le 03/05/2025
+- [x] ARCH-05.1: Harmonisation des noms de services de dés (DiceService/DicesService) - Terminé le 03/05/2025
 - [x] Système d'enregistrement et diagnostic (Logger) - Terminé le 03/05/2025
+- [x] ARCH-06: Implémentation d'un écran de chargement pour séquencer l'initialisation des services - Terminé le 03/05/2025
+- [x] ARCH-06.1: Amélioration de l'écran de chargement pour attendre le démarrage complet des services - Terminé le 03/05/2025
+- [x] ARCH-07: Correction du problème de nommage dans la détection des services démarrés dans l'écran de chargement - Terminé le 03/05/2025
 
 ## Services Core (Priorité 1)
 - [x] StatisticsService (statistiques de jeu) - Terminé le 03/05/2025

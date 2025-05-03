@@ -7,10 +7,10 @@ const VERSION: String = "0.0.1"
 const SaveManagerClass = preload("res://utils/save_manager.gd")
 const CashServiceClass = preload("res://services/cash/cash_service.gd")
 const ScoreServiceClass = preload("res://services/score/score_service.gd")
-const DiceServiceClass = preload("res://services/dices/dice_service.gd")
+const DicesServiceClass = preload("res://services/dices/dices_service.gd")
 const StatisticsServiceClass = preload("res://services/statistics/statistics_service.gd")
 const RulesServiceClass = preload("res://services/rules/rules_service.gd")
-const UpgradeServiceClass = preload("res://services/upgrade/upgrade_service.gd")
+const UpgradesServiceClass = preload("res://services/upgrades/upgrades_service.gd")
 const GameServiceClass = preload("res://services/game/game_service.gd")
 
 # Signaux globaux
@@ -22,24 +22,27 @@ signal load_game_completed(success)
 
 # Services existants (pour la rétrocompatibilité)
 var cash: Cash 
-var score: Score 
-var dices: Dices 
+var dices: DicesService 
 
 # Services intégrés avec BaseService
 var cash_service: CashService
 var score_service: ScoreService
-var dice_service: DiceService
+var dices_service: DicesService
 
 # Nouveaux services (à instancier plus tard)
 var statistics_service: StatisticsServiceClass = null
-var rules: RulesServiceClass = null
-var upgrades: UpgradeServiceClass = null
-var game: GameServiceClass = null
+var rules_service: RulesServiceClass = null
+var upgrades_service: UpgradesServiceClass = null
+var game_service: GameServiceClass = null
 
 # Informations d'état
 var is_initialized: bool = false
 var is_loading: bool = false
 var is_saving: bool = false
+
+# Arbre de dépendances entre services
+var service_dependencies = {}
+var service_startup_order = []
 
 func _ready() -> void:
 	print("Initialisation du système de services (version %s)" % VERSION)
@@ -69,36 +72,33 @@ func _create_services() -> void:
 	
 	# Services existants (pour la rétrocompatibilité)
 	cash = Cash.new()
-	score = Score.new()
-	dices = preload("res://services/dices/dices.tscn").instantiate()
+	dices = preload("res://services/dices/dices_service.tscn").instantiate()
 	
 	# Services intégrés avec BaseService
 	cash_service = CashServiceClass.new()
 	score_service = ScoreServiceClass.new()
-	dice_service = DiceServiceClass.new()
+	dices_service = DicesServiceClass.new()
 	
 	# Instantiation des nouveaux services
 	statistics_service = StatisticsServiceClass.new()
-	rules = RulesServiceClass.new()
-	upgrades = UpgradeServiceClass.new()
-	game = GameServiceClass.new()
+	rules_service = RulesServiceClass.new()
+	upgrades_service = UpgradesServiceClass.new()
+	game_service = GameServiceClass.new()
 	
 	# Ajouter comme enfants pour qu'ils reçoivent _process, etc.
 	add_child(cash)
-	add_child(score)
 	add_child(dices)
 	
 	# Ajouter les nouveaux services BaseService
 	add_child(cash_service)
 	add_child(score_service)
-	add_child(dice_service)
+	add_child(dices_service)
 	
 	# Ajouter les nouveaux services
 	add_child(statistics_service)
-	# Les autres services seront ajoutés quand ils seront implémentés
-	# add_child(rules)
-	# add_child(upgrades)
-	# add_child(game)
+	add_child(rules_service)
+	add_child(upgrades_service)
+	add_child(game_service)
 
 # Étape 2: Initialisation de base des services
 func _initialize_services() -> void:
@@ -107,7 +107,7 @@ func _initialize_services() -> void:
 	# Les services hérités de BaseService ont une méthode initialize()
 	cash_service.initialize()
 	score_service.initialize()
-	dice_service.initialize()
+	dices_service.initialize()
 	
 	# Initialisation du service de statistiques
 	statistics_service.initialize()
@@ -121,48 +121,71 @@ func _initialize_services() -> void:
 func _setup_dependencies() -> void:
 	print("Configuration des dépendances entre services...")
 	
-	# Pour DiceService, nous devons lui fournir une référence à la table de jeu
-	# Cette référence sera mise à jour lorsque la table sera disponible
-	dice_service.setup_dependencies({})
+	# Réinitialiser l'arbre de dépendances
+	service_dependencies.clear()
+	service_startup_order.clear()
 	
-	# Pas de dépendances pour CashService et ScoreService pour le moment
+	# Configuration des dépendances pour DicesService (pas de dépendances pour le moment)
+	dices_service.setup_dependencies({})
+	
+	# Configuration des dépendances pour CashService (pas de dépendances)
 	cash_service.setup_dependencies({})
+	
+	# Configuration des dépendances pour ScoreService (pas de dépendances)
 	score_service.setup_dependencies({})
 	
 	# Configuration des dépendances pour StatisticsService
 	statistics_service.setup_dependencies({
 		"cash_service": cash_service,
 		"score_service": score_service,
-		"dice_service": dice_service
+		"dices_service": dices_service
 	})
 	
 	# Les autres services seront configurés dans une future tâche
-	# rules.setup_dependencies({})
-	# upgrades.setup_dependencies({
-	#     "game_data": game_data
-	# })
-	# game.setup_dependencies({
-	#     "data_service": game_data,
-	#     "rules_service": rules,
-	#     "upgrade_service": upgrades
-	# })
+
+	rules_service.setup_dependencies({"dices_service": dices_service})
+	
+	upgrades_service.setup_dependencies({
+		"cash_service": cash_service,
+		"score_service": score_service
+	})
+	
+	game_service.setup_dependencies({
+		"dices_service": dices_service,
+		"rules_service": rules_service,
+		"upgrades_service": upgrades_service,
+		"statistics_service": statistics_service
+	})
+	
+	# Construire l'arbre de dépendances à partir des informations des services
+	_build_dependency_tree_from_services()
+	
+	# Calculer l'ordre de démarrage des services
+	service_startup_order = _calculate_startup_order()
+	print("Ordre de démarrage des services calculé: %s" % [service_startup_order])
 
 # Étape 4: Démarrage des services
 func _start_services() -> void:
-	print("Démarrage des services...")
+	print("Démarrage des services dans l'ordre calculé...")
 	
-	# Démarrage des services BaseService
-	cash_service.start()
-	score_service.start()
-	dice_service.start()
-	
-	# Démarrage du service de statistiques
-	statistics_service.start()
-	
-	# Les autres services seront démarrés dans une future tâche
-	# rules.start()
-	# upgrades.start()
-	# game.start()
+	# Démarrer les services selon l'ordre de dépendances calculé
+	for service_name in service_startup_order:
+		print("Démarrage du service: %s" % service_name)
+		
+		if service_name == "cash_service":
+			cash_service.start()
+		elif service_name == "score_service":
+			score_service.start()
+		elif service_name == "dices_service":
+			dices_service.start()
+		elif service_name == "statistics_service":
+			statistics_service.start()
+		elif service_name == "rules_service":
+			rules_service.start()
+		elif service_name == "upgrades_service":
+			upgrades_service.start()
+		elif service_name == "game_service":
+			game_service.start()
 
 # Étape 5: Connexion des signaux entre services
 func _connect_signals() -> void:
@@ -176,6 +199,63 @@ func _connect_signals() -> void:
 	# game_data.gold_changed.connect(_on_gold_changed)
 	# game_data.score_changed.connect(_on_score_changed)
 
+# Construction de l'arbre de dépendances à partir des informations des services
+func _build_dependency_tree_from_services() -> void:
+	print("Construction de l'arbre de dépendances à partir des informations des services...")
+	
+	# Définir les services et leur mapping de noms
+	var service_name_map = {
+		cash_service: "cash_service",
+		score_service: "score_service",
+		dices_service: "dices_service",
+		statistics_service: "statistics_service",
+		rules_service: "rules_service",
+		upgrades_service: "upgrades_service",
+		game_service: "game_service"
+	}
+	
+	# Récupérer les dépendances déclarées par chaque service
+	for service in service_name_map.keys():
+		var service_key = service_name_map[service]
+		service_dependencies[service_key] = []
+		
+		# Convertir les noms des dépendances en clés internes
+		for dependency_name in service.service_dependencies:
+			# Ajouter la dépendance si elle existe dans notre système
+			service_dependencies[service_key].append(dependency_name)
+
+# Calcule l'ordre de démarrage des services en fonction de leurs dépendances
+func _calculate_startup_order() -> Array:
+	var visited = {}
+	var order = []
+	
+	# Initialiser tous les services comme non visités
+	for service_name in service_dependencies.keys():
+		visited[service_name] = false
+	
+	# Parcourir chaque service non visité
+	for service_name in service_dependencies.keys():
+		if not visited[service_name]:
+			_visit_service(service_name, visited, order)
+	
+	# Inverser l'ordre pour avoir les dépendances en premier
+	order.reverse()
+	return order
+
+# Fonction récursive pour visiter les services et leurs dépendances (tri topologique)
+func _visit_service(service_name: String, visited: Dictionary, order: Array) -> void:
+	# Marquer comme visité
+	visited[service_name] = true
+	
+	# Visiter d'abord toutes les dépendances
+	if service_dependencies.has(service_name):
+		for dependency in service_dependencies[service_name]:
+			if not visited.has(dependency) or not visited[dependency]:
+				_visit_service(dependency, visited, order)
+	
+	# Ajouter ce service à l'ordre après ses dépendances
+	order.append(service_name)
+
 # Handlers pour assurer la compatibilité avec le système existant
 func _on_cash_service_changed(new_cash: int) -> void:
 	# Mettre à jour l'ancien service cash pour la rétrocompatibilité
@@ -183,9 +263,8 @@ func _on_cash_service_changed(new_cash: int) -> void:
 	cash.emit_signal("cash_changed", new_cash)
 	
 func _on_score_service_changed(new_score: int) -> void:
-	# Mettre à jour l'ancien service score pour la rétrocompatibilité
-	score._score = new_score
-	score.emit_signal("score_changed", new_score)
+	# L'ancien service score n'est plus utilisé
+	pass
 
 # Fonctions de sauvegarde et chargement
 func save_game() -> void:
@@ -207,12 +286,13 @@ func save_game() -> void:
 	# Collecte des données des services BaseService
 	save_data["services"]["cash_service"] = cash_service.get_save_data()
 	save_data["services"]["score_service"] = score_service.get_save_data()
-	save_data["services"]["dice_service"] = dice_service.get_save_data()
+	save_data["services"]["dice_service"] = dices_service.get_save_data()
 	save_data["services"]["statistics_service"] = statistics_service.get_save_data()
 	
 	# Pour la rétrocompatibilité, aussi enregistrer dans l'ancien format
 	save_data["services"]["cash"] = { "amount": cash._cash }
-	save_data["services"]["score"] = { "score": score._score }
+	# Score ancien service retiré
+	# save_data["services"]["score"] = { "score": score._score }
 	save_data["services"]["dices"] = dices.get_save_data() if "get_save_data" in dices else {}
 	
 	# Les autres nouveaux services utiliseront leur méthode get_save_data()
@@ -264,16 +344,13 @@ func load_game() -> bool:
 			
 			if services_data.has("dice_service"):
 				print("Chargement des données du service DiceService")
-				service_success = service_success and dice_service.load_save_data(services_data["dice_service"])
+				service_success = service_success and dices_service.load_save_data(services_data["dice_service"])
 			
 			if services_data.has("statistics_service"):
 				print("Chargement des données du service StatisticsService")
 				service_success = service_success and statistics_service.load_save_data(services_data["statistics_service"])
-				
-				# Mise à jour des services existants pour la rétrocompatibilité
-				if "score" in services_data:
-					score._score = services_data["score"].get("score", 0)
-					score.emit_signal("score_changed", score._score)  # Forcer l'émission du signal
+			
+			# Mise à jour des services existants pour la rétrocompatibilité
 			if "dices" in services_data:
 				if "load_save_data" in dices:
 					dices.load_save_data(services_data["dices"])
@@ -311,7 +388,6 @@ func reset_all_services(with_persistence: bool = false) -> void:
 	
 	# Réinitialiser les services existants
 	cash._cash = 0
-	score._score = 0
 	
 	# Réinitialiser les nouveaux services quand ils seront implémentés
 	# game_data.reset(with_persistence)
@@ -327,16 +403,13 @@ func reset_game(with_persistence: bool = false) -> void:
 	cash._cash = 0
 	cash.emit_signal("changed")
 	
-	score._score = 0
-	score.emit_signal("changed")
-	
 	if "perform_reset" in dices:
 		dices.perform_reset(with_persistence)
 	
 	# Réinitialiser les services BaseService
 	cash_service.perform_reset(with_persistence)
 	score_service.perform_reset(with_persistence)
-	dice_service.perform_reset(with_persistence)
+	dices_service.perform_reset(with_persistence)
 	statistics_service.perform_reset(with_persistence)
 	# game.perform_reset(with_persistence)
 	

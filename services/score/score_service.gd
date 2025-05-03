@@ -18,10 +18,10 @@ func _init():
 # Surcharge des méthodes de BaseService
 func initialize() -> void:
 	if is_initialized:
-		log_message(["service", "init"], "Service déjà initialisé", "WARNING")
+		Logger.log_message("score_service", ["service", "init"], "Service déjà initialisé", "WARNING")
 		return
 	
-	log_message(["service", "init"], "Initialisation", "INFO")
+	Logger.log_message("score_service", ["service", "init"], "Initialisation", "INFO")
 	
 	# Initialisation du score à 0
 	_score = 0
@@ -31,22 +31,22 @@ func initialize() -> void:
 
 func setup_dependencies(_dependencies: Dictionary = {}) -> void:
 	if not is_initialized:
-		log_message(["service", "dependencies"], "Tentative de configurer les dépendances avant initialisation", "ERROR")
+		Logger.log_message("score_service", ["service", "dependencies"], "Tentative de configurer les dépendances avant initialisation", "ERROR")
 		return
 	
-	log_message(["service", "dependencies"], "Configuration des dépendances", "INFO")
+	Logger.log_message("score_service", ["service", "dependencies"], "Configuration des dépendances", "INFO")
 	# Pas de dépendances nécessaires pour ce service
 
 func start() -> void:
 	if not is_initialized:
-		log_message(["service", "start"], "Tentative de démarrer le service avant initialisation", "ERROR")
+		Logger.log_message("score_service", ["service", "start"], "Tentative de démarrer le service avant initialisation", "ERROR")
 		return
 		
 	if is_started:
-		log_message(["service", "start"], "Service déjà démarré", "WARNING")
+		Logger.log_message("score_service", ["service", "start"], "Service déjà démarré", "WARNING")
 		return
 	
-	log_message(["service", "start"], "Démarrage", "INFO")
+	Logger.log_message("score_service", ["service", "start"], "Démarrage", "INFO")
 	
 	is_started = true
 	started.emit()
@@ -54,33 +54,33 @@ func start() -> void:
 # Méthodes spécifiques au service Score
 func pass_goal(goal: int) -> void:
 	if not is_started:
-		log_message(["score", "gameplay"], "Tentative d'ajouter un score avant le démarrage complet du service", "WARNING")
+		Logger.log_message("score_service", ["score", "gameplay"], "Tentative d'ajouter un score avant le démarrage complet du service", "WARNING")
 	
 	if goal < 1 or goal > 6:
-		log_message(["score", "gameplay"], "Valeur de goal invalide: %d (doit être entre 1 et 6)" % goal, "WARNING")
+		Logger.log_message("score_service", ["score", "gameplay"], "Valeur de goal invalide: %d (doit être entre 1 et 6)" % goal, "WARNING")
 		return
 		
 	var scored = 7 - goal
 	_score += scored
-	log_message(["score", "gameplay"], "Passage du goal %d, ajout de %d points, nouveau score: %d" % [goal, scored, _score], "DEBUG")
+	Logger.log_message("score_service", ["score", "gameplay"], "Passage du goal %d, ajout de %d points, nouveau score: %d" % [goal, scored, _score], "DEBUG")
 
 func add_score(points: int) -> void:
 	if not is_started:
-		log_message(["score", "gameplay"], "Tentative d'ajouter un score avant le démarrage complet du service", "WARNING")
+		Logger.log_message("score_service", ["score", "gameplay"], "Tentative d'ajouter un score avant le démarrage complet du service", "WARNING")
 	
 	if points <= 0:
-		log_message(["score", "gameplay"], "Tentative d'ajouter un nombre de points non positif: %d" % points, "WARNING")
+		Logger.log_message("score_service", ["score", "gameplay"], "Tentative d'ajouter un nombre de points non positif: %d" % points, "WARNING")
 		return
 		
 	_score += points
-	log_message(["score", "gameplay"], "Ajout de %d points, nouveau score: %d" % [points, _score], "DEBUG")
+	Logger.log_message("score_service", ["score", "gameplay"], "Ajout de %d points, nouveau score: %d" % [points, _score], "DEBUG")
 
 func get_score() -> int:
 	return _score
 
 func set_score(new_score: int) -> void:
 	if new_score < 0:
-		log_message(["score", "setting"], "Tentative de définir un score négatif: %d" % new_score, "WARNING")
+		Logger.log_message("score_service", ["score", "setting"], "Tentative de définir un score négatif: %d" % new_score, "WARNING")
 		new_score = 0
 		
 	_score = new_score

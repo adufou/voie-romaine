@@ -92,12 +92,12 @@ func throw_win():
 
 func win():
 	pop_up_message("$" + str(gold_reward))
-	Services.cash.add_cash(gold_reward)
+	Services.cash_service.add_cash(gold_reward)
 	reset()
 	
 func lose():
 	pop_up_message("LOSE")
-	Services.dices.remove_dice(self)
+	Services.dice_service.remove_dice(self)
 	queue_free()
 
 func on_throw_lose():
@@ -105,7 +105,7 @@ func on_throw_lose():
 	
 func on_throw_win():
 	add_gold_reward(goal)
-	Services.score.pass_goal(goal)
+	Services.score_service.pass_goal(goal)
 
 func add_gold_reward(goal):
 	var reward = 7 - goal

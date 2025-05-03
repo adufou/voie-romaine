@@ -31,10 +31,10 @@ func _init():
 # Surcharge des méthodes de BaseService
 func initialize() -> void:
 	if is_initialized:
-		log_message(["service", "init"], "Service déjà initialisé", "WARNING")
+		Logger.log_message("rules_service", ["service", "init"], "Service déjà initialisé", "WARNING")
 		return
 	
-	log_message(["service", "init"], "Initialisation", "INFO")
+	Logger.log_message("rules_service", ["service", "init"], "Initialisation", "INFO")
 	
 	# Initialisation de l'état
 	reset_game_state()
@@ -44,22 +44,22 @@ func initialize() -> void:
 
 func setup_dependencies(_dependencies: Dictionary = {}) -> void:
 	if not is_initialized:
-		log_message(["service", "dependencies"], "Tentative de configurer les dépendances avant initialisation", "ERROR")
+		Logger.log_message("rules_service", ["service", "dependencies"], "Tentative de configurer les dépendances avant initialisation", "ERROR")
 		return
 	
-	log_message(["service", "dependencies"], "Configuration des dépendances", "INFO")
+	Logger.log_message("rules_service", ["service", "dependencies"], "Configuration des dépendances", "INFO")
 	# Pas de dépendances nécessaires pour ce service de base
 
 func start() -> void:
 	if not is_initialized:
-		log_message(["service", "start"], "Tentative de démarrer le service avant initialisation", "ERROR")
+		Logger.log_message("rules_service", ["service", "start"], "Tentative de démarrer le service avant initialisation", "ERROR")
 		return
 		
 	if is_started:
-		log_message(["service", "start"], "Service déjà démarré", "WARNING")
+		Logger.log_message("rules_service", ["service", "start"], "Service déjà démarré", "WARNING")
 		return
 	
-	log_message(["service", "start"], "Démarrage", "INFO")
+	Logger.log_message("rules_service", ["service", "start"], "Démarrage", "INFO")
 	
 	is_started = true
 	started.emit()
@@ -70,28 +70,28 @@ func start() -> void:
 func reset_game_state() -> void:
 	current_goal = 6
 	remaining_attempts = rules_config["goal_attempts"][current_goal]
-	log_message(["rules", "game"], "État du jeu réinitialisé: but=%d, essais=%d" % [current_goal, remaining_attempts], "INFO")
+	Logger.log_message("rules_service", ["rules", "game"], "État du jeu réinitialisé: but=%d, essais=%d" % [current_goal, remaining_attempts], "INFO")
 
 ## Définit une règle spécifique
 func set_rule(rule_name: String, value) -> void:
 	if not rule_name in rules_config:
-		log_message(["rules", "config"], "Tentative de définir une règle inexistante: %s" % rule_name, "WARNING")
+		Logger.log_message("rules_service", ["rules", "config"], "Tentative de définir une règle inexistante: %s" % rule_name, "WARNING")
 		return
 		
 	var old_value = rules_config[rule_name]
 	rules_config[rule_name] = value
 	
-	log_message(["rules", "config"], "Règle modifiée: %s = %s (ancienne valeur: %s)" % [rule_name, str(value), str(old_value)], "INFO")
+	Logger.log_message("rules_service", ["rules", "config"], "Règle modifiée: %s = %s (ancienne valeur: %s)" % [rule_name, str(value), str(old_value)], "INFO")
 	rule_changed.emit(rule_name, value)
 
 ## Configure le nombre d'essais pour chaque but
 func set_goal_attempts(goal_number: int, attempts: int) -> void:
 	if goal_number < 1 or goal_number > 6:
-		log_message(["rules", "config"], "Numéro de but invalide: %d" % goal_number, "WARNING")
+		Logger.log_message("rules_service", ["rules", "config"], "Numéro de but invalide: %d" % goal_number, "WARNING")
 		return
 		
 	if attempts < 1:
-		log_message(["rules", "config"], "Nombre d'essais invalide: %d" % attempts, "WARNING")
+		Logger.log_message("rules_service", ["rules", "config"], "Nombre d'essais invalide: %d" % attempts, "WARNING")
 		return
 		
 	rules_config["goal_attempts"][goal_number] = attempts
@@ -100,19 +100,19 @@ func set_goal_attempts(goal_number: int, attempts: int) -> void:
 	if goal_number == current_goal:
 		remaining_attempts = attempts
 		
-	log_message(["rules", "config"], "Essais pour le but %d définis à %d" % [goal_number, attempts], "INFO")
+	Logger.log_message("rules_service", ["rules", "config"], "Essais pour le but %d définis à %d" % [goal_number, attempts], "INFO")
 	rule_changed.emit("goal_attempts", rules_config["goal_attempts"])
 
 ## Résout un lancer de dé selon les règles actuelles
 func resolve_throw(dice_value: int) -> Dictionary:
 	if not is_started:
-		log_message(["rules", "gameplay"], "Tentative de résoudre un lancer avant le démarrage complet du service", "WARNING")
+		Logger.log_message("rules_service", ["rules", "gameplay"], "Tentative de résoudre un lancer avant le démarrage complet du service", "WARNING")
 	
 	if dice_value < 1 or dice_value > 6:
-		log_message(["rules", "gameplay"], "Valeur de dé invalide: %d" % dice_value, "WARNING")
+		Logger.log_message("rules_service", ["rules", "gameplay"], "Valeur de dé invalide: %d" % dice_value, "WARNING")
 		return {}
 		
-	log_message(["rules", "gameplay"], "Résolution du lancer: dé=%d, but=%d, essais_restants=%d" % 
+	Logger.log_message("rules_service", ["rules", "gameplay"], "Résolution du lancer: dé=%d, but=%d, essais_restants=%d" % 
 		[dice_value, current_goal, remaining_attempts], "DEBUG")
 	
 	# Résultat par défaut (échec)
@@ -134,7 +134,7 @@ func resolve_throw(dice_value: int) -> Dictionary:
 		if randf() < rules_config["critical_chance"]:
 			result.critical = true
 			result.reward = int(result.reward * rules_config["critical_multiplier"])
-			log_message(["rules", "gameplay"], "Critique! Récompense multipliée: %d" % result.reward, "INFO")
+			Logger.log_message("rules_service", ["rules", "gameplay"], "Critique! Récompense multipliée: %d" % result.reward, "INFO")
 		
 		# Passer au but suivant (ou revenir à 6 si on était à 1)
 		if current_goal > 1:
@@ -146,7 +146,7 @@ func resolve_throw(dice_value: int) -> Dictionary:
 		result.new_attempts = rules_config["goal_attempts"][result.new_goal]
 		
 		goal_achieved.emit(current_goal, result.reward)
-		log_message(["rules", "gameplay"], "But %d atteint! Nouveau but: %d, Récompense: %d" % 
+		Logger.log_message("rules_service", ["rules", "gameplay"], "But %d atteint! Nouveau but: %d, Récompense: %d" % 
 			[current_goal, result.new_goal, result.reward], "INFO")
 	
 	# Vérifier conditions de Beugnette (but + 1 quand plus d'essais)
@@ -155,7 +155,7 @@ func resolve_throw(dice_value: int) -> Dictionary:
 		result.new_attempts = rules_config["goal_attempts"][current_goal]
 		
 		beugnette_triggered.emit(current_goal)
-		log_message(["rules", "gameplay"], "Beugnette sur le but %d! Essais réinitialisés à %d" % 
+		Logger.log_message("rules_service", ["rules", "gameplay"], "Beugnette sur le but %d! Essais réinitialisés à %d" % 
 			[current_goal, result.new_attempts], "INFO")
 	
 	# Vérifier conditions de Super Beugnette
@@ -166,7 +166,7 @@ func resolve_throw(dice_value: int) -> Dictionary:
 			result.new_attempts = rules_config["goal_attempts"][6]
 			
 			super_beugnette_triggered.emit()
-			log_message(["rules", "gameplay"], "Super Beugnette! Retour au but 6 avec %d essais" % 
+			Logger.log_message("rules_service", ["rules", "gameplay"], "Super Beugnette! Retour au but 6 avec %d essais" % 
 				result.new_attempts, "INFO")
 	
 	# Mise à jour de l'état interne du service
@@ -194,11 +194,11 @@ func get_game_state() -> Dictionary:
 ## Définit un multiplicateur de récompense
 func set_reward_multiplier(multiplier: float) -> void:
 	if multiplier <= 0:
-		log_message(["rules", "config"], "Multiplicateur de récompense invalide: %f" % multiplier, "WARNING")
+		Logger.log_message("rules_service", ["rules", "config"], "Multiplicateur de récompense invalide: %f" % multiplier, "WARNING")
 		return
 		
 	rules_config["reward_multiplier"] = multiplier
-	log_message(["rules", "config"], "Multiplicateur de récompense défini à %f" % multiplier, "INFO")
+	Logger.log_message("rules_service", ["rules", "config"], "Multiplicateur de récompense défini à %f" % multiplier, "INFO")
 	rule_changed.emit("reward_multiplier", multiplier)
 
 # Gestion des données et persistance

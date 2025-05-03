@@ -45,10 +45,10 @@ func _init():
 # Surcharge des méthodes de BaseService
 func initialize() -> void:
     if is_initialized:
-        log_message(["service", "init"], "Service déjà initialisé", "WARNING")
+        Logger.log_message("game_data_service", ["service", "init"], "Service déjà initialisé", "WARNING")
         return
     
-    log_message(["service", "init"], "Initialisation", "INFO")
+    Logger.log_message("game_data_service", ["service", "init"], "Initialisation", "INFO")
     
     # Réinitialisation des statistiques à leurs valeurs par défaut
     _reset_statistics()
@@ -58,37 +58,37 @@ func initialize() -> void:
 
 func setup_dependencies(dependencies: Dictionary = {}) -> void:
     if not is_initialized:
-        log_message(["service", "dependencies"], "Tentative de configurer les dépendances avant initialisation", "ERROR")
+        Logger.log_message("game_data_service", ["service", "dependencies"], "Tentative de configurer les dépendances avant initialisation", "ERROR")
         return
     
-    log_message(["service", "dependencies"], "Configuration des dépendances", "INFO")
+    Logger.log_message("game_data_service", ["service", "dependencies"], "Configuration des dépendances", "INFO")
     
     # Récupération des références aux services requis
     if dependencies.has("cash_service"):
         cash_service = dependencies["cash_service"]
     else:
-        log_message(["service", "dependencies"], "Cash service non fourni dans les dépendances", "WARNING")
+        Logger.log_message("game_data_service", ["service", "dependencies"], "Cash service non fourni dans les dépendances", "WARNING")
     
     if dependencies.has("score_service"):
         score_service = dependencies["score_service"]
     else:
-        log_message(["service", "dependencies"], "Score service non fourni dans les dépendances", "WARNING")
+        Logger.log_message("game_data_service", ["service", "dependencies"], "Score service non fourni dans les dépendances", "WARNING")
     
     if dependencies.has("dice_service"):
         dice_service = dependencies["dice_service"]
     else:
-        log_message(["service", "dependencies"], "Dice service non fourni dans les dépendances", "WARNING")
+        Logger.log_message("game_data_service", ["service", "dependencies"], "Dice service non fourni dans les dépendances", "WARNING")
 
 func start() -> void:
     if not is_initialized:
-        log_message(["service", "start"], "Tentative de démarrer le service avant initialisation", "ERROR")
+        Logger.log_message("game_data_service", ["service", "start"], "Tentative de démarrer le service avant initialisation", "ERROR")
         return
         
     if is_started:
-        log_message(["service", "start"], "Service déjà démarré", "WARNING")
+        Logger.log_message("game_data_service", ["service", "start"], "Service déjà démarré", "WARNING")
         return
     
-    log_message(["service", "start"], "Démarrage", "INFO")
+    Logger.log_message("game_data_service", ["service", "start"], "Démarrage", "INFO")
     
     # Connexion aux signaux des autres services pour suivre les statistiques
     if cash_service:
@@ -116,7 +116,7 @@ func _on_score_changed(new_score: int) -> void:
     # Mise à jour du meilleur score si nécessaire
     if new_score > get_statistic("game", "best_score"):
         set_statistic("game", "best_score", new_score)
-        log_message(["statistics", "score"], "Nouveau meilleur score: %d" % new_score, "INFO")
+        Logger.log_message("game_data_service", ["statistics", "score"], "Nouveau meilleur score: %d" % new_score, "INFO")
 
 func _on_dice_thrown() -> void:
     increment_statistic("dice", "total_throws")
@@ -124,37 +124,37 @@ func _on_dice_thrown() -> void:
 # Gestion des statistiques
 func get_statistic(category: String, name: String) -> Variant:
     if not _statistics.has(category) or not _statistics[category].has(name):
-        log_message(["statistics"], "Statistique demandée inexistante: %s.%s" % [category, name], "WARNING")
+        Logger.log_message("game_data_service", ["statistics"], "Statistique demandée inexistante: %s.%s" % [category, name], "WARNING")
         return 0
         
     return _statistics[category][name]
 
 func set_statistic(category: String, name: String, value: Variant) -> void:
     if not _statistics.has(category):
-        log_message(["statistics"], "Catégorie de statistique inexistante: %s" % category, "WARNING")
+        Logger.log_message("game_data_service", ["statistics"], "Catégorie de statistique inexistante: %s" % category, "WARNING")
         return
         
     if not _statistics[category].has(name):
-        log_message(["statistics"], "Statistique inexistante dans la catégorie %s: %s" % [category, name], "WARNING")
+        Logger.log_message("game_data_service", ["statistics"], "Statistique inexistante dans la catégorie %s: %s" % [category, name], "WARNING")
         return
         
     _statistics[category][name] = value
     statistic_changed.emit(category + "." + name, value)
-    log_message(["statistics"], "Statistique %s.%s mise à jour: %s" % [category, name, str(value)], "DEBUG")
+    Logger.log_message("game_data_service", ["statistics"], "Statistique %s.%s mise à jour: %s" % [category, name, str(value)], "DEBUG")
 
 func increment_statistic(category: String, name: String, amount: int = 1) -> void:
     if not _statistics.has(category) or not _statistics[category].has(name):
-        log_message(["statistics"], "Statistique à incrémenter inexistante: %s.%s" % [category, name], "WARNING")
+        Logger.log_message("game_data_service", ["statistics"], "Statistique à incrémenter inexistante: %s.%s" % [category, name], "WARNING")
         return
         
     var current_value = _statistics[category][name]
     if typeof(current_value) != TYPE_INT and typeof(current_value) != TYPE_FLOAT:
-        log_message(["statistics"], "Tentative d'incrémenter une statistique non numérique: %s.%s" % [category, name], "WARNING")
+        Logger.log_message("game_data_service", ["statistics"], "Tentative d'incrémenter une statistique non numérique: %s.%s" % [category, name], "WARNING")
         return
         
     _statistics[category][name] += amount
     statistic_changed.emit(category + "." + name, _statistics[category][name])
-    log_message(["statistics"], "Statistique %s.%s incrémentée de %d: nouvelle valeur %s" % 
+    Logger.log_message("game_data_service", ["statistics"], "Statistique %s.%s incrémentée de %d: nouvelle valeur %s" % 
         [category, name, amount, str(_statistics[category][name])], "DEBUG")
 
 func get_all_statistics() -> Dictionary:

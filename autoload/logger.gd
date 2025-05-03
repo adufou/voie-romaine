@@ -164,8 +164,31 @@ func _rotate_log_files() -> void:
 			var new_path = log_directory + "game_" + date_time + ".log"
 			dir.rename(old_path, new_path)
 
-# Récupération des logs pour l'affichage
 
+
+## Log avec niveau - utilitaire pour le débogage avec groupement
+## @param groups: Tableau de groupes de log (ex: ["currency", "transaction"])
+## @param message: Message à journaliser
+## @param criticality: Niveau de criticité (DEBUG, INFO, WARNING, ERROR), défaut à DEBUG
+func log_message(source: String, groups: Array[String], message: String, criticality: String = "DEBUG") -> void:
+	# Ajouter automatiquement le nom du service comme premier groupe
+	var flags: Array[String] = [source]
+	flags.append_array(groups)
+	
+	# Utiliser l'autoload Logger directement
+	match criticality:
+		"DEBUG":
+			Logger.debug(flags, message)
+		"INFO":
+			Logger.info(flags, message)
+		"WARNING":
+			Logger.warning(flags, message)
+		"ERROR":
+			Logger.error(flags, message)
+		_:
+			Logger.debug(flags, message)
+
+# Récupération des logs pour l'affichage
 func get_last_logs(count: int = 50, level_filter: int = LogLevel.DEBUG, groups_filter: Array[String] = []) -> Array[Dictionary]:
 	var filtered_logs: Array[Dictionary] = []
 	

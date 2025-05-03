@@ -22,6 +22,8 @@ var service_name: String = "base_service"
 var is_initialized: bool = false
 ## Indique si le service a complété sa phase de démarrage
 var is_started: bool = false
+## Liste des dépendances du service (noms des services dont dépend ce service)
+var service_dependencies: Array[String] = []
 
 #########################################################
 # Initialisation en trois phases pour éviter les problèmes de dépendances
@@ -48,6 +50,11 @@ func setup_dependencies(dependencies: Dictionary = {}) -> void:
 		return
 	
 	print("Configuration des dépendances du service: %s" % service_name)
+	
+	# Enregistrer les noms des services dont dépend ce service
+	service_dependencies.clear() # Réinitialiser la liste des dépendances
+	for dependency_name in dependencies.keys():
+		service_dependencies.append(dependency_name)
 	
 	# À implémenter dans les sous-classes pour configurer les références à d'autres services
 	# Les dépendances sont passées en paramètre par le service principal
@@ -124,28 +131,3 @@ func load_save_data(data: Dictionary) -> bool:
 	
 	return true
 
-#########################################################
-# Utilitaires
-#########################################################
-
-## Log avec niveau - utilitaire pour le débogage avec groupement
-## @param groups: Tableau de groupes de log (ex: ["currency", "transaction"])
-## @param message: Message à journaliser
-## @param criticality: Niveau de criticité (DEBUG, INFO, WARNING, ERROR), défaut à DEBUG
-func log_message(groups: Array[String], message: String, criticality: String = "DEBUG") -> void:
-	# Ajouter automatiquement le nom du service comme premier groupe
-	var service_groups: Array[String] = [service_name]
-	service_groups.append_array(groups)
-	
-	# Utiliser l'autoload Logger directement
-	match criticality:
-		"DEBUG":
-			Logger.debug(service_groups, message)
-		"INFO":
-			Logger.info(service_groups, message)
-		"WARNING":
-			Logger.warning(service_groups, message)
-		"ERROR":
-			Logger.error(service_groups, message)
-		_:
-			Logger.debug(service_groups, message)

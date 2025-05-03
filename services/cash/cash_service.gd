@@ -18,10 +18,10 @@ func _init():
 # Surcharge des méthodes de BaseService
 func initialize() -> void:
 	if is_initialized:
-		log_message(["service", "init"], "Service déjà initialisé", "WARNING")
+		Logger.log_message("cash_service", ["service", "init"], "Service déjà initialisé", "WARNING")
 		return
 	
-	log_message(["service", "init"], "Initialisation", "INFO")
+	Logger.log_message("cash_service", ["service", "init"], "Initialisation", "INFO")
 	
 	# Initialisation du cash à 0
 	_cash = 0
@@ -31,22 +31,22 @@ func initialize() -> void:
 
 func setup_dependencies(_dependencies: Dictionary = {}) -> void:
 	if not is_initialized:
-		log_message(["service", "dependencies"], "Tentative de configurer les dépendances avant initialisation", "ERROR")
+		Logger.log_message("cash_service", ["service", "dependencies"], "Tentative de configurer les dépendances avant initialisation", "ERROR")
 		return
 	
-	log_message(["service", "dependencies"], "Configuration des dépendances", "INFO")
+	Logger.log_message("cash_service", ["service", "dependencies"], "Configuration des dépendances", "INFO")
 	# Pas de dépendances nécessaires pour ce service
 
 func start() -> void:
 	if not is_initialized:
-		log_message(["service", "start"], "Tentative de démarrer le service avant initialisation", "ERROR")
+		Logger.log_message("cash_service", ["service", "start"], "Tentative de démarrer le service avant initialisation", "ERROR")
 		return
 		
 	if is_started:
-		log_message(["service", "start"], "Service déjà démarré", "WARNING")
+		Logger.log_message("cash_service", ["service", "start"], "Service déjà démarré", "WARNING")
 		return
 	
-	log_message(["service", "start"], "Démarrage", "INFO")
+	Logger.log_message("cash_service", ["service", "start"], "Démarrage", "INFO")
 	
 	is_started = true
 	started.emit()
@@ -54,29 +54,29 @@ func start() -> void:
 # Méthodes spécifiques au service Cash
 func add_cash(added_cash: int) -> void:
 	if not is_started:
-		log_message(["cash", "currency"], "Tentative d'ajouter du cash avant le démarrage complet du service", "WARNING")
+		Logger.log_message("cash_service", ["cash", "currency"], "Tentative d'ajouter du cash avant le démarrage complet du service", "WARNING")
 	
 	if added_cash <= 0:
-		log_message(["cash", "currency"], "Tentative d'ajouter une valeur de cash non positive: %d" % added_cash, "WARNING")
+		Logger.log_message("cash_service", ["cash", "currency"], "Tentative d'ajouter une valeur de cash non positive: %d" % added_cash, "WARNING")
 		return
 		
 	_cash += added_cash
-	log_message(["cash", "currency"], "Ajout de %d cash, nouveau total: %d" % [added_cash, _cash], "DEBUG")
+	Logger.log_message("cash_service", ["cash", "currency"], "Ajout de %d cash, nouveau total: %d" % [added_cash, _cash], "DEBUG")
 
 func use_cash(quantity: int) -> bool:
 	if not is_started:
-		log_message(["cash", "transaction"], "Tentative d'utiliser du cash avant le démarrage complet du service", "WARNING")
+		Logger.log_message("cash_service", ["cash", "transaction"], "Tentative d'utiliser du cash avant le démarrage complet du service", "WARNING")
 	
 	if quantity <= 0:
-		log_message(["cash", "transaction"], "Tentative d'utiliser une quantité de cash non positive: %d" % quantity, "WARNING")
+		Logger.log_message("cash_service", ["cash", "transaction"], "Tentative d'utiliser une quantité de cash non positive: %d" % quantity, "WARNING")
 		return false
 		
 	if _cash < quantity:
-		log_message(["cash", "transaction"], "Cash insuffisant: %d demandé, %d disponible" % [quantity, _cash], "INFO")
+		Logger.log_message("cash_service", ["cash", "transaction"], "Cash insuffisant: %d demandé, %d disponible" % [quantity, _cash], "INFO")
 		return false
 		
 	_cash -= quantity
-	log_message(["cash", "transaction"], "Utilisation de %d cash, nouveau total: %d" % [quantity, _cash], "DEBUG")
+	Logger.log_message("cash_service", ["cash", "transaction"], "Utilisation de %d cash, nouveau total: %d" % [quantity, _cash], "DEBUG")
 	return true
 
 func has_enough(quantity: int) -> bool:
@@ -87,7 +87,7 @@ func get_cash() -> int:
 
 func set_cash(new_cash: int) -> void:
 	if new_cash < 0:
-		log_message(["cash", "setting"], "Tentative de définir un cash négatif: %d" % new_cash, "WARNING")
+		Logger.log_message("cash_service", ["cash", "setting"], "Tentative de définir un cash négatif: %d" % new_cash, "WARNING")
 		new_cash = 0
 		
 	_cash = new_cash

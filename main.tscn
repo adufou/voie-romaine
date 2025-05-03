@@ -1,10 +1,14 @@
-[gd_scene load_steps=3 format=3 uid="uid://bp58kbvdtuqjq"]
+[gd_scene load_steps=5 format=3 uid="uid://bp58kbvdtuqjq"]
 
-[ext_resource type="PackedScene" uid="uid://c1e2lx06a1phf" path="res://scenes/table.tscn" id="1_ig7tw"]
-[ext_resource type="PackedScene" uid="uid://73jt52qmeu7p" path="res://scenes/hud.tscn" id="3_h2yge"]
+[ext_resource type="Script" uid="uid://dly0asj8m5a7" path="res://main.gd" id="1_h2yge"]
+[ext_resource type="PackedScene" uid="uid://cly10iqix7n0j" path="res://scenes/loading_screen.tscn" id="2_1bvp3"]
+[ext_resource type="PackedScene" uid="uid://c1e2lx06a1phf" path="res://scenes/table.tscn" id="2_lquwl"]
+[ext_resource type="PackedScene" uid="uid://73jt52qmeu7p" path="res://scenes/hud.tscn" id="3_7mycd"]
 
 [node name="Main" type="Node"]
+script = ExtResource("1_h2yge")
+table_scene = ExtResource("2_lquwl")
+hud_scene = ExtResource("3_7mycd")
 
-[node name="Table" parent="." instance=ExtResource("1_ig7tw")]
-
-[node name="HUD" parent="." instance=ExtResource("3_h2yge")]
+[node name="LoadingScreen" parent="." instance=ExtResource("2_1bvp3")]
+unique_name_in_owner = true
