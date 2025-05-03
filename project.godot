@@ -24,6 +24,10 @@ Services="*res://autoload/services.gd"
 
 window/stretch/mode="canvas_items"
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/dice_syntax/plugin.cfg")
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
