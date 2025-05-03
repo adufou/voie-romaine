@@ -5,13 +5,14 @@ class_name Dice
 @export var pop_up_message_scene: PackedScene # Make it a service if used in several places 
 
 var value: int
+var slot_id: int = -1  # ID du slot attribué par le DicesService
+
+# Variables d'affichage synchronisées avec le RulesService
 var goal: int = 6:
 	set(new_value):
 		%Goal.text = str(new_value)
 		goal = new_value
 		
-var gold_reward: int = 0
-
 var tries: int = -1: # -1 => Infinite
 	set(new_value):
 		var tries_text = "∞"
@@ -22,7 +23,15 @@ var tries: int = -1: # -1 => Infinite
 		tries = new_value
 
 func _ready() -> void:
+	# Connexion aux signaux du RulesService
+	Services.rules_service.goal_achieved.connect(_on_goal_achieved)
+	Services.rules_service.beugnette_triggered.connect(_on_beugnette_triggered)
+	Services.rules_service.super_beugnette_triggered.connect(_on_super_beugnette_triggered)
+	
 	reset()
+
+func set_slot_id(id: int) -> void:
+	slot_id = id
 
 func throw():
 	%AnimatedSprite2D.play("throw")
@@ -34,83 +43,67 @@ func set_value():
 	
 	# Utiliser DiceSyntaxService pour le lancer de dé
 	value = Services.dice_syntax_service.roll_die(6)
-	
 	%AnimatedSprite2D.frame = value - 1
 	
-	var throw_number = "?" if (goal == 6 and tries == -1) else str(goal - tries + 1)
+	# Déléguer la résolution du lancer au RulesService
+	var result: ThrowResult = Services.rules_service.resolve_throw(value)
 	
-	# pop_up_message("N°" + str(throw_number) + " of " + str(goal) + " | Rolled " + str(value))
-
-	throw_resolve()
+	# Enregistrer le résultat dans le DicesService
+	if slot_id >= 0:
+		Services.dices_service.register_dice_result(slot_id, result)
+	
+	process_throw_result(result)
 
 func _on_timer_timeout() -> void:
 	set_value()
 
-func throw_resolve() -> void:
-	if (value == goal):
-		throw_win()
-		if (goal == 1):
-			win()
-			return
-			
-		goal -= 1
-		tries = goal
-		
-	else:
-		if (goal == 1 and value == 6): # Super beugnette
-			goal = 6
-			tries = -1
-			pop_up_message("Super beugnette...")
-		
-		elif (tries > 1):
-			tries -= 1
-				
-		elif (tries == 1):
-			if (value == goal + 1): # Beugnette
-				tries = goal
-				pop_up_message("Beugnette !")
-				return
-			
-			throw_lose()
+# Traite le résultat du lancer calculé par le RulesService
+func process_throw_result(result: ThrowResult) -> void:
+	# Mise à jour de l'interface uniquement
+	goal = result.new_goal
+	tries = result.new_attempts
+	
+	# Affichage des récompenses obtenues
+	if result.success and result.reward > 0:
+		pop_up_message("$" + str(result.reward))
+	
+	# Affichage des événements spéciaux
+	if result.beugnette:
+		pop_up_message("Beugnette !")
+	if result.super_beugnette:
+		pop_up_message("Super beugnette...")
+	if result.is_final_win():
+		pop_up_message("SÉQUENCE COMPLÈTE!")
 
 func reset():
-	goal = 6
-	tries = -1
-	gold_reward = 0
+	# Pas besoin de réinitialiser le RulesService car il est partagé entre tous les dés
+	# Services.rules_service.reset_game_state()
+	
+	# Synchronisation avec l'état du RulesService
+	var game_state = Services.rules_service.get_game_state()
+	goal = game_state.current_goal
+	tries = game_state.remaining_attempts
+	
 	throw()
 
-func throw_lose():
-	if (goal == 6 and tries > 0):
-		lose()
-	
-	goal += 1
-	tries = goal
-	
-	on_throw_lose()
-
-func throw_win():
-	on_throw_win()
-
-func win():
-	pop_up_message("$" + str(gold_reward))
-	Services.cash_service.add_cash(gold_reward)
-	reset()
-	
 func lose():
 	pop_up_message("LOSE")
-	Services.dices_service.remove_dice(self)
-	queue_free()
+	# Ne plus supprimer le dé à l'échec
+	# Services.dices_service.remove_dice(self)
+	# queue_free()
 
-func on_throw_lose():
+# Gestion des événements du RulesService (plus besoin d'actions spécifiques)
+func _on_goal_achieved(goal_number: int, reward: int) -> void:
+	# Rien à faire ici, affichage géré dans process_throw_result
 	pass
-	
-func on_throw_win():
-	add_gold_reward(goal)
-	Services.score_service.pass_goal(goal)
 
-func add_gold_reward(goal):
-	var reward = 7 - goal
-	gold_reward += reward
+func _on_beugnette_triggered(goal_number: int) -> void:
+	# Rien à faire ici, affichage géré dans process_throw_result
+	pass
+
+func _on_super_beugnette_triggered() -> void:
+	# Rien à faire ici, affichage géré dans process_throw_result
+	pass
 
 func pop_up_message(message: String):
 	var pop_up_message: PopUpMessage = pop_up_message_scene.instantiate()

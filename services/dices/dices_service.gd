@@ -14,7 +14,8 @@ var table: Node = null          # Référence à la table de jeu
 
 # Données internes
 const MAX_DICES = 32           # Nombre maximum de dés autorisés
-var dices: Dictionary = {}     # Dictionnaire des dés actifs [slot_id: int] -> Dice
+var dices: Dictionary[int, Dice] = {}     # Dictionnaire des dés actifs [slot_id: int] -> Dice
+var dice_results: Dictionary[int, ThrowResult] = {}  # Résultats des dés [slot_id: int] -> ThrowResult
 
 func _init():
 	service_name = "dices_service"
@@ -36,8 +37,9 @@ func initialize() -> void:
 		Logger.log_message("dices_service", ["dice", "resources"], "Impossible de charger la scène de dé", "ERROR")
 		return
 	
-	# Initialisation du dictionnaire de dés
+	# Initialisation des dictionnaires
 	dices = {}
+	dice_results = {}
 	
 	is_initialized = true
 	initialized.emit()
@@ -198,6 +200,26 @@ func get_dice_count() -> int:
 func get_dices() -> Array:
 	return dices.values()
 
+# Méthode pour enregistrer le résultat d'un lancer de dé
+func register_dice_result(slot_id: int, result: ThrowResult) -> void:
+	dice_results[slot_id] = result
+	Logger.log_message("dices_service", ["dice", "throw"], "Résultat enregistré pour le dé %d: %s" % [slot_id, str(result)], "DEBUG")
+
+# Méthode pour récupérer le résultat d'un dé
+func get_dice_result(slot_id: int) -> ThrowResult:
+	if not dice_results.has(slot_id):
+		Logger.log_message("dices_service", ["dice", "throw"], "Aucun résultat trouvé pour le dé %d" % slot_id, "WARNING")
+		return null
+	return dice_results[slot_id]
+
+# Méthode pour lancer tous les dés
+func throw_all_dices() -> void:
+	for slot_id in dices.keys():
+		dices[slot_id].throw()
+	
+	dice_thrown.emit()
+	Logger.log_message("dices_service", ["dice", "throw"], "Tous les dés ont été lancés", "INFO")
+
 func get_dice_values() -> Array:
 	var values = []
 	for dice in dices.values():
@@ -215,11 +237,16 @@ func init_table(table_ref: Node) -> void:
 
 # Gestion des données et persistance
 func perform_reset(with_persistence: bool = false) -> void:
-	if not with_persistence:
-		# Supprimer tous les dés
+	if not is_started:
+		Logger.log_message("dices_service", ["service", "reset"], "Tentative de réinitialiser le service avant démarrage", "WARNING")
+		return
+		
+	# Supprimer tous les dés
+	if with_persistence:
 		for dice in dices.values():
 			dice.queue_free()
 		dices.clear()
+		dice_results.clear()
 	
 	super.perform_reset(with_persistence)
 
@@ -252,6 +279,7 @@ func load_save_data(data: Dictionary) -> bool:
 	for dice in dices.values():
 		dice.queue_free()
 	dices.clear()
+	dice_results.clear()
 	
 	# Restaurer les dés sauvegardés
 	if data.has("dices"):

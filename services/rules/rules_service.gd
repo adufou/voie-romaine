@@ -7,6 +7,7 @@ signal rule_changed(rule_name, new_value)
 signal goal_achieved(goal_number, reward)
 signal beugnette_triggered(goal_number)
 signal super_beugnette_triggered()
+signal sequence_completed(total_reward)  # Signal émis quand une séquence complète est terminée
 
 # Configuration des règles
 var rules_config = {
@@ -105,46 +106,69 @@ func set_goal_attempts(goal_number: int, attempts: int) -> void:
 	rule_changed.emit("goal_attempts", rules_config["goal_attempts"])
 
 ## Résout un lancer de dé selon les règles actuelles
-func resolve_throw(dice_value: int) -> Dictionary:
+func resolve_throw(dice_value: int) -> ThrowResult:
 	if not is_started:
 		Logger.log_message("rules_service", ["rules", "gameplay"], "Tentative de résoudre un lancer avant le démarrage complet du service", "WARNING")
 	
 	if dice_value < 1 or dice_value > 6:
 		Logger.log_message("rules_service", ["rules", "gameplay"], "Valeur de dé invalide: %d" % dice_value, "WARNING")
-		return {}
+		return ThrowResult.new()
 		
 	Logger.log_message("rules_service", ["rules", "gameplay"], "Résolution du lancer: dé=%d, but=%d, essais_restants=%d" % 
 		[dice_value, current_goal, remaining_attempts], "DEBUG")
 	
 	# Résultat par défaut (échec)
-	var result = {
-		"success": dice_value == current_goal,
-		"beugnette": false,
-		"super_beugnette": false,
-		"new_goal": current_goal,
-		"new_attempts": remaining_attempts - 1,
-		"reward": 0,
-		"critical": false
-	}
+	var result = ThrowResult.new()
+	result.success = dice_value == current_goal
+	result.new_goal = current_goal
+	result.new_attempts = remaining_attempts - 1
+	result.dice_value = dice_value
 	
 	# Vérifier si le lancer est un succès
 	if result.success:
-		result.reward = calculate_reward(current_goal)
+		# Calcul de la récompense basée sur la valeur du dé: (faces+1) - valeur
+		result.reward = calculate_reward_from_dice_value(dice_value) 
+		
+		# Ajouter la récompense directement
+		Services.cash_service.add_cash(result.reward)
 		
 		# Vérifier si c'est un critique
 		if randf() < rules_config["critical_chance"]:
+			# Sauvegarder l'ancienne récompense pour calculer le bonus
+			var old_reward = result.reward
+			
 			result.critical = true
 			result.reward = int(result.reward * rules_config["critical_multiplier"])
 			Logger.log_message("rules_service", ["rules", "gameplay"], "Critique! Récompense multipliée: %d" % result.reward, "INFO")
+			
+			# Ajouter le bonus de critique
+			Services.cash_service.add_cash(result.reward - old_reward)
 		
 		# Passer au but suivant (ou revenir à 6 si on était à 1)
 		if current_goal > 1:
 			result.new_goal = current_goal - 1
-		else:
-			result.new_goal = 6
+			result.new_attempts = rules_config["goal_attempts"][result.new_goal]
 			
-		# Réinitialiser les essais pour le nouveau but
-		result.new_attempts = rules_config["goal_attempts"][result.new_goal]
+			# Signal au score service
+			Services.score_service.pass_goal(current_goal)
+		else:
+			# Séquence complète! Récompense bonus?
+			var completion_bonus = calculate_completion_bonus()
+			if completion_bonus > 0:
+				Services.cash_service.add_cash(completion_bonus)
+				result.reward += completion_bonus
+			
+			# On vient de compléter la séquence entière! On repart au début
+			result.new_goal = 6
+			# Essais illimités pour le but 6 après avoir complété la séquence
+			result.new_attempts = -1  # -1 signifie illimité
+			
+			# Signal au score service et émetttre le signal de séquence complète
+			Services.score_service.pass_goal(current_goal)
+			sequence_completed.emit(result.reward)
+			
+			Logger.log_message("rules_service", ["rules", "gameplay"], "Séquence complète! Bonus: %d, Total: %d" %
+				[completion_bonus, result.reward], "INFO")
 		
 		goal_achieved.emit(current_goal, result.reward)
 		Logger.log_message("rules_service", ["rules", "gameplay"], "But %d atteint! Nouveau but: %d, Récompense: %d" % 
@@ -174,14 +198,34 @@ func resolve_throw(dice_value: int) -> Dictionary:
 	current_goal = result.new_goal
 	remaining_attempts = result.new_attempts
 	
+	# Log du résultat final pour débogage
+	Logger.log_message("rules_service", ["rules", "gameplay"], "Résultat final: %s" % result, "DEBUG")
+	
 	return result
 
-## Calcule la récompense pour un but atteint
+## Calcule la récompense pour un but atteint (ancienne méthode, gardée pour compatibilité)
 func calculate_reward(goal_number: int) -> int:
 	var base_reward = rules_config["base_rewards"].get(goal_number, 1)
 	var final_reward = int(base_reward * rules_config["reward_multiplier"])
 	
 	return max(1, final_reward) # Toujours au moins 1 de récompense
+
+## Calcule la récompense en fonction de la valeur du dé: (faces+1) - valeur
+func calculate_reward_from_dice_value(dice_value: int, faces: int = 6) -> int:
+	# Formule: (faces+1) - valeur
+	var base_reward = (faces + 1) - dice_value
+	
+	# Application du multiplicateur global
+	var final_reward = int(base_reward * rules_config["reward_multiplier"])
+	
+	return max(1, final_reward) # Toujours au moins 1 de récompense
+
+## Calcule un bonus pour avoir complété une séquence entière
+func calculate_completion_bonus() -> int:
+	var base_bonus = 15  # Bonus de base pour une séquence
+	var multiplier = rules_config["reward_multiplier"]
+	
+	return int(base_bonus * multiplier)
 
 ## Obtient l'état actuel de la partie
 func get_game_state() -> Dictionary:
