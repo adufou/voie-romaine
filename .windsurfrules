@@ -2,4 +2,6 @@ Tu peux regarder _todo_, _todolist_, _todolist.md, et _specs_ pour avoir une id�
 Quand tu finis une tache, tu peux mettre des infos reliees dans _todo_/_tasks_infos_/ , des fichiers .md préfixé de l'id de la tache.
 N'oublie pas aussi de mettre à jour _todolist.md_ et _todolist_, le fichier .md correspondant.
 
+Avant de commiter, verifie avec git status
+Si tu trouves un fichier .gd ou .tscn, il y aura surement un fichier .gd.uid ou .tscn.uid
 Quand tu commit, tu dois suivre cette convention gcm 'feat/ARCH-02: begin implementation of ARCH-02' (ARCHO-02 etant la tache, si on vient d'en traiter une)

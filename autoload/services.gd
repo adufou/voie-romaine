@@ -3,6 +3,9 @@ extends Node
 # Version de l'autoload Services
 const VERSION: String = "0.0.1"
 
+# Préchargement des dépendances
+const SaveManagerClass = preload("res://utils/save_manager.gd")
+
 # Signaux globaux
 signal services_ready
 signal save_game_started
@@ -148,10 +151,10 @@ func save_game() -> void:
 		"services": {}
 	}
 	
-	# Les données des services seront ajoutées ici dans une future tâche
-	# Exemple avec des données pour les services qui existent déjà:
+	# Collecte des données des services existants
 	save_data["services"]["cash"] = { "amount": cash._cash }
 	save_data["services"]["score"] = { "score": score._score }
+	save_data["services"]["dices"] = dices.get_save_data() if "get_save_data" in dices else {}
 	
 	# Les nouveaux services utiliseront leur méthode get_save_data()
 	# save_data["services"]["game_data"] = game_data.get_save_data()
@@ -159,9 +162,10 @@ func save_game() -> void:
 	# save_data["services"]["upgrades"] = upgrades.get_save_data()
 	# save_data["services"]["game"] = game.get_save_data()
 	
-	# TODO: Implémenter la sauvegarde des données dans un fichier
-	# Cela sera fait dans une future tâche (ARCH-04)
-	print("Jeu sauvegardé")
+	# Sauvegarde des données dans un fichier avec le SaveManager
+	var success = SaveManagerClass.save_data(save_data)
+	if not success:
+		push_error("Échec de la sauvegarde du jeu")
 	
 	is_saving = false
 	save_game_completed.emit()
@@ -175,29 +179,41 @@ func load_game() -> bool:
 	is_loading = true
 	load_game_started.emit()
 	
-	# TODO: Charger les données depuis un fichier
-	# Cela sera fait dans une future tâche (ARCH-04)
-	var success = false
-	var load_data = null  # Ceci sera remplacé par les données réelles chargées
+	# Charger les données depuis un fichier avec le SaveManager
+	var load_data = SaveManagerClass.load_data()
+	var success = not load_data.is_empty()
 	
-	if load_data != null:
+	if success:
+		# Vérifier la compatibilité de version
+		if "version" in load_data and load_data["version"] != VERSION:
+			print("Version de sauvegarde différente: %s (actuelle: %s)" % [load_data["version"], VERSION])
+			# Pour l'instant, on continue le chargement même si les versions sont différentes
+		
 		# Charger les données dans chaque service
-		# Les services existants seront mis à jour directement
 		if "services" in load_data:
 			var services_data = load_data["services"]
 			
-			# Exemple avec des données pour les services qui existent déjà:
+			# Mise à jour des services existants
 			if "cash" in services_data:
 				cash._cash = services_data["cash"].get("amount", 0)
+				cash.emit_signal("changed")  # Forcer l'émission du signal pour mettre à jour l'UI
 			
 			if "score" in services_data:
 				score._score = services_data["score"].get("score", 0)
+				score.emit_signal("changed")  # Forcer l'émission du signal pour mettre à jour l'UI
+				
+			if "dices" in services_data and "load_save_data" in dices:
+				dices.load_save_data(services_data["dices"])
 			
 			# Les nouveaux services utiliseront leur méthode load_save_data()
 			# if "game_data" in services_data:
 			#     game_data.load_save_data(services_data["game_data"])
 			# if "rules" in services_data:
 			#     rules.load_save_data(services_data["rules"])
+			# if "upgrades" in services_data:
+			#     upgrades.load_save_data(services_data["upgrades"])
+			# if "game" in services_data:
+			#     game.load_save_data(services_data["game"])
 			# if "upgrades" in services_data:
 			#     upgrades.load_save_data(services_data["upgrades"])
 			# if "game" in services_data:
@@ -210,6 +226,10 @@ func load_game() -> bool:
 	
 	is_loading = false
 	load_game_completed.emit(success)
+	if success:
+		print("Jeu chargé avec succès")
+	else:
+		print("Aucune sauvegarde trouvée ou échec du chargement")
 	return success
 
 # Réinitialiser tous les services (utile pour le prestige ou le redémarrage)
@@ -225,3 +245,29 @@ func reset_all_services(with_persistence: bool = false) -> void:
 	# rules.reset(with_persistence)
 	# upgrades.reset(with_persistence)
 	# game.reset(with_persistence)
+
+# Réinitialise le jeu sans charger de sauvegarde
+func reset_game(with_persistence: bool = false) -> void:
+	print("Réinitialisation du jeu (persistance: %s)" % with_persistence)
+	
+	# Les services existants seront réinitialisés directement
+	cash._cash = 0
+	cash.emit_signal("changed")
+	
+	score._score = 0
+	score.emit_signal("changed")
+	
+	if "perform_reset" in dices:
+		dices.perform_reset(with_persistence)
+	
+	# Réinitialiser les nouveaux services
+	# game_data.perform_reset(with_persistence)
+	# rules.perform_reset(with_persistence)
+	# upgrades.perform_reset(with_persistence)
+	# game.perform_reset(with_persistence)
+	
+	# Si we_persistence est false, supprimer également les fichiers de sauvegarde
+	if not with_persistence:
+		SaveManagerClass.delete_save_data()
+	
+	print("Jeu réinitialisé")
