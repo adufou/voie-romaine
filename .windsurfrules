@@ -1,3 +1,4 @@
+Si on lance une tache depuis la todolist, verifie qu'il y a une entree dans la todolist. Si non, creer une.
 Tu peux regarder _todo_, _todolist_, _todolist.md, et _specs_ pour avoir une idée de ce que tu dois faire.
 Quand tu finis une tache, tu peux mettre des infos reliees dans _todo_/_tasks_infos_/ , des fichiers .md préfixé de l'id de la tache.
 N'oublie pas aussi de mettre à jour _todolist.md_ et _todolist_, le fichier .md correspondant.
