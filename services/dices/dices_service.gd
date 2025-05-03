@@ -52,11 +52,24 @@ func setup_dependencies(dependencies: Dictionary[String, BaseService] = {}) -> v
 	# Récupération de la référence à la table depuis le table_service
 	if dependencies.has("table_service"):
 		var table_service = dependencies["table_service"]
-		table = table_service.get_table() # Cette méthode garantit maintenant qu'une table valide est toujours retournée
-		Logger.log_message("dices_service", ["dice", "table"], "Table de jeu configurée via table_service", "INFO")
+		# La méthode get_table() peut maintenant retourner null si table_scene n'est pas configurée
+		table = table_service.get_table()
+		
+		if table:
+			Logger.log_message("dices_service", ["dice", "table"], "Table de jeu configurée via table_service", "INFO")
+		else:
+			Logger.log_message("dices_service", ["dice", "table"], "Aucune table disponible dans le table_service, sera configurée plus tard", "INFO")
+			# Nous connecterons à table_created plus tard pour obtenir la table quand elle sera créée
+			table_service.table_created.connect(_on_table_created)
 	else:
 		Logger.log_message("dices_service", ["dice", "table"], "Table service non fourni dans les dépendances", "WARNING")
 
+# Fonction appelée quand une table est créée par le service de table
+func _on_table_created(new_table) -> void:
+	Logger.log_message("dices_service", ["dice", "table"], "Nouvelle table créée et connectée au service de dés", "INFO")
+	table = new_table
+
+# Fonction de démarrage du service
 func start() -> void:
 	if not is_initialized:
 		Logger.log_message("dices_service", ["service", "start"], "Tentative de démarrer le service avant initialisation", "ERROR")
@@ -66,8 +79,6 @@ func start() -> void:
 		Logger.log_message("dices_service", ["service", "start"], "Service déjà démarré", "WARNING")
 		return
 	
-	# La vérification de table n'est plus nécessaire car table_service garantit toujours une table valide
-		
 	Logger.log_message("dices_service", ["service", "start"], "Démarrage", "INFO")
 	
 	is_started = true

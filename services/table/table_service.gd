@@ -46,8 +46,9 @@ func start() -> void:
 	
 	Logger.log_message("table_service", ["service", "start"], "Démarrage", "INFO")
 	
-	# Création de la table à ce moment
-	create_table()
+	# Ne pas créer la table automatiquement - c'est main.gd qui le fera
+	# avec la scène de table correcte
+	Logger.log_message("table_service", ["service", "start"], "La table sera créée explicitement par main.gd plus tard", "INFO")
 	
 	is_started = true
 	started.emit()
@@ -60,8 +61,26 @@ func create_table() -> void:
 	
 	if table_scene:
 		# Si une scène de table a été fournie, l'instancier
+		Logger.log_message("table_service", ["table", "creation"], "Instanciation de la scène de table...", "INFO")
 		table_node = table_scene.instantiate()
-		Logger.log_message("table_service", ["table", "creation"], "Table créée à partir de la scène fournie", "INFO")
+		
+		# Log des propriétés importantes de la table
+		if table_node:
+			Logger.log_message("table_service", ["table", "creation"], "Table créée à partir de la scène fournie", "INFO")
+			Logger.log_message("table_service", ["table", "debug"], "Type de table: %s" % table_node.get_class(), "INFO")
+			Logger.log_message("table_service", ["table", "debug"], "Visibilité de la table: %s" % table_node.visible, "INFO")
+			
+			# Si c'est un Control, log des propriétés spécifiques
+			if table_node is Control:
+				Logger.log_message("table_service", ["table", "debug"], "La table est un noeud Control", "INFO")
+				Logger.log_message("table_service", ["table", "debug"], "Anchors/Margins: %s, %s, %s, %s" % [
+					table_node.anchor_left, table_node.anchor_top, table_node.anchor_right, table_node.anchor_bottom
+				], "INFO")
+				
+				# Forcer certaines propriétés pour s'assurer de la visibilité
+				table_node.visible = true 
+		else:
+			Logger.log_message("table_service", ["table", "creation"], "Erreur lors de l'instanciation de la scène de table", "ERROR")
 	else:
 		# Sinon, créer une table par défaut (Node2D)
 		table_node = Node2D.new()
@@ -73,12 +92,19 @@ func create_table() -> void:
 		Logger.log_message("table_service", ["table", "creation"], "Table par défaut créée", "WARNING")
 	
 	# Émettre le signal dans tous les cas
+	Logger.log_message("table_service", ["table", "signal"], "Émission du signal table_created", "INFO")
 	table_created.emit(table_node)
 
 func get_table() -> Node:
 	if not table_node:
-		Logger.log_message("table_service", ["table", "access"], "Tentative d'accès à la table avant sa création, création forcée", "WARNING")
-		# Créer la table si elle n'existe pas encore
-		create_table()
+		# Si table_scene n'est pas configurée, ne pas créer la table automatiquement
+		if table_scene:
+			Logger.log_message("table_service", ["table", "access"], "Tentative d'accès à la table avant sa création, création avec la scène configurée", "WARNING")
+			# Créer la table avec la scène configurée
+			create_table()
+		else:
+			Logger.log_message("table_service", ["table", "access"], "Tentative d'accès à la table avant sa création, mais aucune scène configurée", "WARNING")
+			# Retourner null pour indiquer qu'aucune table n'est disponible
+			return null
 	
 	return table_node
