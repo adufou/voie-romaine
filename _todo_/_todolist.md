@@ -14,6 +14,7 @@ Jeu incrémental basé sur la Voie Romaine (lancer de dé pour obtenir 6→5→4
 - [x] ARCH-06.1: Amélioration de l'écran de chargement pour attendre le démarrage complet des services - Terminé le 03/05/2025
 - [x] ARCH-07: Correction du problème de nommage dans la détection des services démarrés dans l'écran de chargement - Terminé le 03/05/2025
 - [x] ARCH-08: Implémentation des dépendances explicites entre services pour assurer le bon ordre de chargement - Terminé le 03/05/2025
+- [x] REFACTOR-01: Suppression de la classe Cash obsolète (remplacée par CashService) - Terminé le 03/05/2025
 
 ## Services Core (Priorité 1)
 - [x] StatisticsService (statistiques de jeu) - Terminé le 03/05/2025

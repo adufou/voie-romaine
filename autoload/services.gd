@@ -21,10 +21,6 @@ signal save_game_completed
 signal load_game_started
 signal load_game_completed(success)
 
-# Services existants (pour la rétrocompatibilité)
-var cash: Cash 
-var dices: DicesService 
-
 # Services intégrés avec BaseService
 var cash_service: CashService
 var score_service: ScoreService
@@ -72,10 +68,6 @@ func _ready() -> void:
 func _create_services() -> void:
 	Logger.info(["services"], "Création des services...")
 	
-	# Services existants (pour la rétrocompatibilité)
-	cash = Cash.new()
-	# dices = preload("res://services/dices/dices_service.tscn").instantiate()
-	
 	# Services intégrés avec BaseService
 	cash_service = CashServiceClass.new()
 	score_service = ScoreServiceClass.new()
@@ -88,11 +80,7 @@ func _create_services() -> void:
 	upgrades_service = UpgradesServiceClass.new()
 	game_service = GameServiceClass.new()
 	
-	# Ajouter comme enfants pour qu'ils reçoivent _process, etc.
-	add_child(cash)
-	add_child(dices)
-	
-	# Ajouter les nouveaux services BaseService
+	# Ajouter les services BaseService
 	add_child(cash_service)
 	add_child(score_service)
 	add_child(dices_service)
@@ -200,7 +188,7 @@ func _connect_signals() -> void:
 	print("Connexion des signaux entre services...")
 	
 	# Connecter les signaux des nouveaux services aux anciens pour la rétrocompatibilité
-	cash_service.cash_changed.connect(_on_cash_service_changed)
+	# Plus besoin de mise à jour de rétrocompatibilité pour cash
 	score_service.score_changed.connect(_on_score_service_changed)
 	
 	# Les autres connexions seront ajoutées dans une future tâche
@@ -291,10 +279,6 @@ func _visit_service(service_name: String, visited: Dictionary, order: Array) -> 
 	order.append(service_name)
 
 # Handlers pour assurer la compatibilité avec le système existant
-func _on_cash_service_changed(new_cash: int) -> void:
-	# Mettre à jour l'ancien service cash pour la rétrocompatibilité
-	cash._cash = new_cash
-	cash.emit_signal("cash_changed", new_cash)
 	
 func _on_score_service_changed(new_score: int) -> void:
 	# L'ancien service score n'est plus utilisé
@@ -324,10 +308,10 @@ func save_game() -> void:
 	save_data["services"]["statistics_service"] = statistics_service.get_save_data()
 	
 	# Pour la rétrocompatibilité, aussi enregistrer dans l'ancien format
-	save_data["services"]["cash"] = { "amount": cash._cash }
+	# cash est maintenant géré par cash_service
 	# Score ancien service retiré
 	# save_data["services"]["score"] = { "score": score._score }
-	save_data["services"]["dices"] = dices.get_save_data() if "get_save_data" in dices else {}
+	# La rétrocompatibilité avec l'ancien service dices a été supprimée
 	
 	# Les autres nouveaux services utiliseront leur méthode get_save_data()
 	# save_data["services"]["game_data"] = game_data.get_save_data()
@@ -384,10 +368,7 @@ func load_game() -> bool:
 				print("Chargement des données du service StatisticsService")
 				service_success = service_success and statistics_service.load_save_data(services_data["statistics_service"])
 			
-			# Mise à jour des services existants pour la rétrocompatibilité
-			if "dices" in services_data:
-				if "load_save_data" in dices:
-					dices.load_save_data(services_data["dices"])
+			# La rétrocompatibilité avec les anciens services a été supprimée
 			
 			# Les autres nouveaux services utiliseront leur méthode load_save_data()
 			# if "game_data" in services_data:
@@ -420,8 +401,8 @@ func load_game() -> bool:
 func reset_all_services(with_persistence: bool = false) -> void:
 	print("Réinitialisation de tous les services (persistance: %s)" % with_persistence)
 	
-	# Réinitialiser les services existants
-	cash._cash = 0
+	# Les services existants ont été remplacés par les services héritant de BaseService
+	# cash_service gère maintenant le cash
 	
 	# Réinitialiser les nouveaux services quand ils seront implémentés
 	# game_data.reset(with_persistence)
@@ -434,11 +415,9 @@ func reset_game(with_persistence: bool = false) -> void:
 	print("Réinitialisation du jeu (persistance: %s)" % with_persistence)
 	
 	# Les services existants seront réinitialisés directement
-	cash._cash = 0
-	cash.emit_signal("changed")
+	# cash_service gère maintenant le cash
 	
-	if "perform_reset" in dices:
-		dices.perform_reset(with_persistence)
+	# La rétrocompatibilité avec l'ancien service dices a été supprimée
 	
 	# Réinitialiser les services BaseService
 	cash_service.perform_reset(with_persistence)
