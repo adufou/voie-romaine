@@ -69,15 +69,19 @@ var version: String = "0.0.1"
 **Dépend de :** ARCH-02  
 **Estimation :** 4 heures  
 **Sources :** `implementation_services.md`, `implementation_game_manager.md`
+**Statut :** ✅ Terminée
 
 ### Description
 Créer le service principal `Services` en tant qu'Autoload qui contiendra et initialisera tous les autres services, assurant ainsi l'ordre d'initialisation contrôlé.
 
 ### Critères de validation
-- [ ] Structure de base du singleton Services avec les méthodes d'initialisation
-- [ ] Mécanisme de création et d'ajout des services
-- [ ] Processus d'initialisation en trois phases pour tous les services
-- [ ] Configuration de l'Autoload dans le projet Godot
+- [x] Structure de base du singleton Services avec les méthodes d'initialisation
+- [x] Mécanisme de création et d'ajout des services
+- [x] Processus d'initialisation en trois phases pour tous les services
+- [x] Configuration de l'Autoload dans le projet Godot
+
+### Résultat
+La documentation complète se trouve dans `_todo_/_tasks_infos_/ARCH-03_creation_singleton_services.md`.
 
 ### Notes techniques
 ```gdscript
@@ -104,15 +108,19 @@ var game: GameService
 **Dépend de :** ARCH-03  
 **Estimation :** 5 heures  
 **Sources :** `implementation_game_manager.md`, `implementation_data_service.md`
+**Statut :** ✅ Terminée
 
 ### Description
 Implémenter le système de base pour sauvegarder et charger les données de jeu via les méthodes `get_save_data()` et `load_save_data()` de chaque service.
 
 ### Critères de validation
-- [ ] Méthodes de sauvegarde et chargement au niveau du service principal
-- [ ] Gestion des erreurs de chargement et compatibilité des versions
-- [ ] Tests avec des données simples pour valider la persistance
-- [ ] Sauvegarde automatique à des intervalles définis
+- [x] Méthodes de sauvegarde et chargement au niveau du service principal
+- [x] Gestion des erreurs de chargement et compatibilité des versions
+- [x] Tests avec des données simples pour valider la persistance
+- [x] Sauvegarde automatique à des intervalles définis
+
+### Résultat
+La documentation complète se trouve dans `_todo_/_tasks_infos_/ARCH-04_systeme_sauvegarde_chargement.md`.
 
 ### Notes techniques
 Utiliser `JSON.stringify()` pour sérialiser les données et `JSON.parse()` pour les désérialiser. S'assurer que la structure de sauvegarde inclut des métadonnées comme la version du jeu.
