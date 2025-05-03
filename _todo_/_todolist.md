@@ -23,6 +23,7 @@ Jeu incrémental basé sur la Voie Romaine (lancer de dé pour obtenir 6→5→4
 - [x] GameService (coordination globale) - Terminé le 03/05/2025
 
 ## Gameplay de Base (Priorité 2)
+- [ ] DICE-01: Intégration de l'addon dice_syntax
 - [ ] Système de dés Voie Romaine (6→5→4→3→2→1)
 - [ ] Beugnette et Super Beugnette
 - [ ] Économie (or & score) et améliorations

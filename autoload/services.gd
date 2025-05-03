@@ -8,6 +8,7 @@ const SaveManagerClass = preload("res://utils/save_manager.gd")
 const CashServiceClass = preload("res://services/cash/cash_service.gd")
 const ScoreServiceClass = preload("res://services/score/score_service.gd")
 const DicesServiceClass = preload("res://services/dices/dices_service.gd")
+const DiceSyntaxServiceClass = preload("res://services/dice_syntax/dice_syntax_service.gd")
 const StatisticsServiceClass = preload("res://services/statistics/statistics_service.gd")
 const RulesServiceClass = preload("res://services/rules/rules_service.gd")
 const TableServiceClass = preload("res://services/table/table_service.gd")
@@ -25,6 +26,7 @@ signal load_game_completed(success)
 var cash_service: CashService
 var score_service: ScoreService
 var dices_service: DicesService
+var dice_syntax_service: DiceSyntaxService
 
 # Nouveaux services (à instancier plus tard)
 var statistics_service: StatisticsServiceClass = null
@@ -72,6 +74,7 @@ func _create_services() -> void:
 	cash_service = CashServiceClass.new()
 	score_service = ScoreServiceClass.new()
 	dices_service = preload("res://services/dices/dices_service.tscn").instantiate() # Instancier à partir de la scène pour avoir dice_scene
+	dice_syntax_service = DiceSyntaxServiceClass.new()
 	
 	# Instantiation des nouveaux services
 	statistics_service = StatisticsServiceClass.new()
@@ -84,6 +87,7 @@ func _create_services() -> void:
 	add_child(cash_service)
 	add_child(score_service)
 	add_child(dices_service)
+	add_child(dice_syntax_service)
 	
 	# Ajouter les nouveaux services
 	add_child(statistics_service)
@@ -100,6 +104,7 @@ func _initialize_services() -> void:
 	cash_service.initialize()
 	score_service.initialize()
 	dices_service.initialize()
+	dice_syntax_service.initialize()
 	statistics_service.initialize()
 	rules_service.initialize()
 	table_service.initialize()
@@ -116,6 +121,9 @@ func _setup_dependencies() -> void:
 	
 	# Configuration du service table (pas de dépendances)
 	table_service.setup_dependencies({})
+	
+	# Configuration des dépendances pour DiceSyntaxService (pas de dépendances)
+	dice_syntax_service.setup_dependencies({})
 	
 	# Configuration des dépendances pour DicesService
 	dices_service.setup_dependencies({
@@ -172,6 +180,8 @@ func _start_services() -> void:
 			score_service.start()
 		elif service_name == "dices_service":
 			dices_service.start()
+		elif service_name == "dice_syntax_service":
+			dice_syntax_service.start()
 		elif service_name == "statistics_service":
 			statistics_service.start()
 		elif service_name == "rules_service":

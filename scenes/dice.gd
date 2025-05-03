@@ -32,7 +32,8 @@ func set_value():
 	%AnimatedSprite2D.animation = "white"
 	%AnimatedSprite2D.pause()
 	
-	value = randi_range(1,6)
+	# Utiliser DiceSyntaxService pour le lancer de dé
+	value = Services.dice_syntax_service.roll_die(6)
 	
 	%AnimatedSprite2D.frame = value - 1
 	
