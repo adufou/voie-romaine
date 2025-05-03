@@ -29,7 +29,7 @@ func initialize() -> void:
 	is_initialized = true
 	initialized.emit()
 
-func setup_dependencies(_dependencies: Dictionary = {}) -> void:
+func setup_dependencies(dependencies: Dictionary[String, BaseService] = {}) -> void:
 	if not is_initialized:
 		Logger.log_message("score_service", ["service", "dependencies"], "Tentative de configurer les dépendances avant initialisation", "ERROR")
 		return

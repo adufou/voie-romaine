@@ -21,9 +21,10 @@ enum GameState {
 var cash_service: CashService = null
 var score_service: ScoreService = null
 var dice_service: DiceService = null
-var statistics_service = null # StatisticsService
+var statistics_service: StatisticsService = null
 var rules_service: RulesService = null
 var upgrades_service: UpgradesService = null
+
 
 # État actuel du jeu
 var game_state: GameState = GameState.MENU
@@ -37,6 +38,14 @@ func _init():
 	service_name = "game_service"
 	version = "0.0.1"
 
+	# Déclarer explicitement les dépendances
+	service_dependencies.append("cash_service")
+	service_dependencies.append("score_service")
+	service_dependencies.append("dice_service")
+	service_dependencies.append("statistics_service")
+	service_dependencies.append("rules_service")
+	service_dependencies.append("upgrades_service")
+
 # Surcharge des méthodes de BaseService
 func initialize() -> void:
 	if is_initialized:
@@ -48,7 +57,7 @@ func initialize() -> void:
 	is_initialized = true
 	initialized.emit()
 
-func setup_dependencies(dependencies: Dictionary = {}) -> void:
+func setup_dependencies(dependencies: Dictionary[String, BaseService] = {}) -> void:
 	if not is_initialized:
 		Logger.log_message("game_service", ["service", "dependencies"], "Tentative de configurer les dépendances avant initialisation", "ERROR")
 		return

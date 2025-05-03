@@ -41,6 +41,11 @@ var _play_time_tracker: float = 0.0
 func _init():
 	service_name = "statistics_service"
 	version = "0.0.1"
+	
+	# Déclarer explicitement les dépendances
+	service_dependencies.append("cash_service")
+	service_dependencies.append("score_service")
+	service_dependencies.append("dices_service")
 
 # Surcharge des méthodes de BaseService
 func initialize() -> void:
@@ -56,7 +61,7 @@ func initialize() -> void:
 	is_initialized = true
 	initialized.emit()
 
-func setup_dependencies(dependencies: Dictionary = {}) -> void:
+func setup_dependencies(dependencies: Dictionary[String, BaseService] = {}) -> void:
 	if not is_initialized:
 		Logger.log_message("statistics_service", ["service", "dependencies"], "Tentative de configurer les dépendances avant initialisation", "ERROR")
 		return

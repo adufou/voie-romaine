@@ -20,6 +20,9 @@ func _init():
 	service_name = "dices_service"
 	version = "0.0.1"
 
+	# Déclarer explicitement les dépendances
+	service_dependencies.append("table_service")
+
 # Surcharge des méthodes de BaseService
 func initialize() -> void:
 	if is_initialized:
@@ -39,19 +42,20 @@ func initialize() -> void:
 	is_initialized = true
 	initialized.emit()
 
-func setup_dependencies(dependencies: Dictionary = {}) -> void:
+func setup_dependencies(dependencies: Dictionary[String, BaseService] = {}) -> void:
 	if not is_initialized:
 		Logger.log_message("dices_service", ["service", "dependencies"], "Tentative de configurer les dépendances avant initialisation", "ERROR")
 		return
 	
 	Logger.log_message("dices_service", ["service", "dependencies"], "Configuration des dépendances", "INFO")
 	
-	# Récupération de la référence à la table depuis les dépendances
-	if dependencies.has("table"):
-		table = dependencies["table"]
-		Logger.log_message("dices_service", ["dice", "table"], "Table de jeu configurée", "INFO")
+	# Récupération de la référence à la table depuis le table_service
+	if dependencies.has("table_service"):
+		var table_service = dependencies["table_service"]
+		table = table_service.get_table() # Cette méthode garantit maintenant qu'une table valide est toujours retournée
+		Logger.log_message("dices_service", ["dice", "table"], "Table de jeu configurée via table_service", "INFO")
 	else:
-		Logger.log_message("dices_service", ["dice", "table"], "Table de jeu non fournie dans les dépendances", "WARNING")
+		Logger.log_message("dices_service", ["dice", "table"], "Table service non fourni dans les dépendances", "WARNING")
 
 func start() -> void:
 	if not is_initialized:
@@ -62,9 +66,7 @@ func start() -> void:
 		Logger.log_message("dices_service", ["service", "start"], "Service déjà démarré", "WARNING")
 		return
 	
-	if not table:
-		Logger.log_message("dices_service", ["dice", "table"], "Table de jeu non configurée, impossible de démarrer le service", "ERROR")
-		return
+	# La vérification de table n'est plus nécessaire car table_service garantit toujours une table valide
 		
 	Logger.log_message("dices_service", ["service", "start"], "Démarrage", "INFO")
 	

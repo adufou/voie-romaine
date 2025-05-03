@@ -10,6 +10,7 @@ const ScoreServiceClass = preload("res://services/score/score_service.gd")
 const DicesServiceClass = preload("res://services/dices/dices_service.gd")
 const StatisticsServiceClass = preload("res://services/statistics/statistics_service.gd")
 const RulesServiceClass = preload("res://services/rules/rules_service.gd")
+const TableServiceClass = preload("res://services/table/table_service.gd")
 const UpgradesServiceClass = preload("res://services/upgrades/upgrades_service.gd")
 const GameServiceClass = preload("res://services/game/game_service.gd")
 
@@ -32,6 +33,7 @@ var dices_service: DicesService
 # Nouveaux services (à instancier plus tard)
 var statistics_service: StatisticsServiceClass = null
 var rules_service: RulesServiceClass = null
+var table_service: TableServiceClass = null
 var upgrades_service: UpgradesServiceClass = null
 var game_service: GameServiceClass = null
 
@@ -72,16 +74,17 @@ func _create_services() -> void:
 	
 	# Services existants (pour la rétrocompatibilité)
 	cash = Cash.new()
-	dices = preload("res://services/dices/dices_service.tscn").instantiate()
+	# dices = preload("res://services/dices/dices_service.tscn").instantiate()
 	
 	# Services intégrés avec BaseService
 	cash_service = CashServiceClass.new()
 	score_service = ScoreServiceClass.new()
-	dices_service = DicesServiceClass.new()
+	dices_service = preload("res://services/dices/dices_service.tscn").instantiate() # Instancier à partir de la scène pour avoir dice_scene
 	
 	# Instantiation des nouveaux services
 	statistics_service = StatisticsServiceClass.new()
 	rules_service = RulesServiceClass.new()
+	table_service = TableServiceClass.new()
 	upgrades_service = UpgradesServiceClass.new()
 	game_service = GameServiceClass.new()
 	
@@ -97,6 +100,7 @@ func _create_services() -> void:
 	# Ajouter les nouveaux services
 	add_child(statistics_service)
 	add_child(rules_service)
+	add_child(table_service)
 	add_child(upgrades_service)
 	add_child(game_service)
 
@@ -108,14 +112,11 @@ func _initialize_services() -> void:
 	cash_service.initialize()
 	score_service.initialize()
 	dices_service.initialize()
-	
-	# Initialisation du service de statistiques
 	statistics_service.initialize()
-	
-	# Les autres services seront initialisés dans une future tâche
-	# rules.initialize()
-	# upgrades.initialize()
-	# game.initialize()
+	rules_service.initialize()
+	table_service.initialize()
+	upgrades_service.initialize()
+	game_service.initialize()
 
 # Étape 3: Configuration des dépendances
 func _setup_dependencies() -> void:
@@ -125,8 +126,13 @@ func _setup_dependencies() -> void:
 	service_dependencies.clear()
 	service_startup_order.clear()
 	
-	# Configuration des dépendances pour DicesService (pas de dépendances pour le moment)
-	dices_service.setup_dependencies({})
+	# Configuration du service table (pas de dépendances)
+	table_service.setup_dependencies({})
+	
+	# Configuration des dépendances pour DicesService
+	dices_service.setup_dependencies({
+		"table_service": table_service
+	})
 	
 	# Configuration des dépendances pour CashService (pas de dépendances)
 	cash_service.setup_dependencies({})
@@ -182,6 +188,8 @@ func _start_services() -> void:
 			statistics_service.start()
 		elif service_name == "rules_service":
 			rules_service.start()
+		elif service_name == "table_service":
+			table_service.start()
 		elif service_name == "upgrades_service":
 			upgrades_service.start()
 		elif service_name == "game_service":
@@ -203,28 +211,55 @@ func _connect_signals() -> void:
 func _build_dependency_tree_from_services() -> void:
 	print("Construction de l'arbre de dépendances à partir des informations des services...")
 	
-	# Définir les services et leur mapping de noms
-	var service_name_map = {
-		cash_service: "cash_service",
-		score_service: "score_service",
-		dices_service: "dices_service",
-		statistics_service: "statistics_service",
-		rules_service: "rules_service",
-		upgrades_service: "upgrades_service",
-		game_service: "game_service"
-	}
+	# Réinitialiser les dépendances
+	service_dependencies.clear()
+	
+	# Collecter tous les services disponibles
+	var available_services = [
+		cash_service,
+		score_service,
+		dices_service,
+		statistics_service,
+		rules_service,
+		table_service,
+		upgrades_service,
+		game_service
+	]
+	
+	# Initialiser toutes les entrées dans le dictionnaire de dépendances
+	# Et créer une map inverse pour chercher les services par nom
+	var services_by_name = {}
+	for service in available_services:
+		if service == null:
+			continue
+		
+		# Utiliser directement le nom défini dans chaque service
+		var service_key = service.service_name
+		service_dependencies[service_key] = []
+		services_by_name[service_key] = service
 	
 	# Récupérer les dépendances déclarées par chaque service
-	for service in service_name_map.keys():
-		var service_key = service_name_map[service]
-		service_dependencies[service_key] = []
+	for service in available_services:
+		if service == null:
+			continue
+			
+		var service_key = service.service_name
 		
-		# Convertir les noms des dépendances en clés internes
+		# Ajouter les dépendances déclarées par le service
 		for dependency_name in service.service_dependencies:
-			# Ajouter la dépendance si elle existe dans notre système
-			service_dependencies[service_key].append(dependency_name)
+			if services_by_name.has(dependency_name):
+				service_dependencies[service_key].append(dependency_name)
+				print("Service %s dépend de %s" % [service_key, dependency_name])
+			else:
+				push_warning("Dépendance inconnue '%s' pour le service '%s'" % [dependency_name, service_key])
+	
+	# Afficher l'arbre de dépendances pour le débogage
+	print("Arbre de dépendances construit:")
+	for service_name in service_dependencies.keys():
+		print("  %s dépend de: %s" % [service_name, service_dependencies[service_name]])
 
 # Calcule l'ordre de démarrage des services en fonction de leurs dépendances
+# Utilise un parcours DFS postorder pour s'assurer que les dépendances sont démarrées avant les services qui en dépendent
 func _calculate_startup_order() -> Array:
 	var visited = {}
 	var order = []
@@ -238,13 +273,12 @@ func _calculate_startup_order() -> Array:
 		if not visited[service_name]:
 			_visit_service(service_name, visited, order)
 	
-	# Inverser l'ordre pour avoir les dépendances en premier
-	order.reverse()
+	# L'ordre est déjà correct (dépendances en premier) grâce au DFS postorder
 	return order
 
-# Fonction récursive pour visiter les services et leurs dépendances (tri topologique)
+# Fonction récursive pour visiter les services et leurs dépendances (DFS postorder)
 func _visit_service(service_name: String, visited: Dictionary, order: Array) -> void:
-	# Marquer comme visité
+	# Marquer comme en cours de visite
 	visited[service_name] = true
 	
 	# Visiter d'abord toutes les dépendances

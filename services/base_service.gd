@@ -44,20 +44,21 @@ func initialize() -> void:
 	initialized.emit()
 
 ## Phase 2: Configuration des liens de dépendance avec d'autres services
-func setup_dependencies(dependencies: Dictionary = {}) -> void:
-	if not is_initialized:
-		push_error("Tentative de configurer les dépendances du service %s avant son initialisation" % service_name)
-		return
-	
-	print("Configuration des dépendances du service: %s" % service_name)
-	
-	# Enregistrer les noms des services dont dépend ce service
-	service_dependencies.clear() # Réinitialiser la liste des dépendances
-	for dependency_name in dependencies.keys():
-		service_dependencies.append(dependency_name)
-	
-	# À implémenter dans les sous-classes pour configurer les références à d'autres services
-	# Les dépendances sont passées en paramètre par le service principal
+func setup_dependencies(dependencies: Dictionary[String, BaseService] = {}) -> void:
+	pass
+#	if not is_initialized:
+#		push_error("Tentative de configurer les dépendances du service %s avant son initialisation" % service_name)
+#		return
+#	
+#	print("Configuration des dépendances du service: %s" % service_name)
+#	
+#	# Ajouter les noms des services passés en paramètre s'ils ne sont pas déjà dans les dépendances
+#	for dependency_name in dependencies.keys():
+#		if not dependency_name in service_dependencies:
+#			service_dependencies.append(dependency_name)
+#	
+#	# À implémenter dans les sous-classes pour configurer les références à d'autres services
+#	# Les dépendances sont passées en paramètre par le service principal
 
 ## Phase 3: Démarrage des fonctionnalités nécessitant d'autres services
 func start() -> void:
@@ -130,4 +131,3 @@ func load_save_data(data: Dictionary) -> bool:
 	load_completed.emit(true)
 	
 	return true
-
