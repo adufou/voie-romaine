@@ -85,7 +85,19 @@ theme_override_constants/margin_top = 32
 theme_override_constants/margin_right = 32
 theme_override_constants/margin_bottom = 32
 
-[node name="CloseShopButton" type="Button" parent="ShopPanel/MarginContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="ShopPanel/MarginContainer"]
+layout_mode = 2
+
+[node name="GridContainer" type="GridContainer" parent="ShopPanel/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="AddDiceButton" type="Button" parent="ShopPanel/MarginContainer/HBoxContainer/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Add Dice"
+
+[node name="CloseShopButton" type="Button" parent="ShopPanel/MarginContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
@@ -95,4 +107,5 @@ text = "X"
 
 [connection signal="pressed" from="InGameHUD/HBoxContainer/VBoxContainerRight/OpenShopButton" to="." method="_on_open_shop_button_pressed"]
 [connection signal="pressed" from="InGameHUD/HBoxContainer/VBoxContainerRight/ThrowDicesButton" to="." method="_on_throw_dices_button_pressed"]
-[connection signal="pressed" from="ShopPanel/MarginContainer/CloseShopButton" to="." method="_on_close_shop_button_pressed"]
+[connection signal="pressed" from="ShopPanel/MarginContainer/HBoxContainer/GridContainer/AddDiceButton" to="." method="_on_add_dice_button_pressed"]
+[connection signal="pressed" from="ShopPanel/MarginContainer/HBoxContainer/CloseShopButton" to="." method="_on_close_shop_button_pressed"]

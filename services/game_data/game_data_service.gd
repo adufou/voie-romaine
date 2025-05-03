@@ -8,7 +8,7 @@ signal statistic_changed(statistic_name, new_value)
 # Dépendances de services
 var cash_service: CashService = null
 var score_service: ScoreService = null
-var dice_service: DiceService = null
+var dices_service: DicesService = null
 
 # Statistiques organisées par catégories
 var _statistics: Dictionary = {
@@ -45,7 +45,7 @@ func _init():
     # Déclarer explicitement les dépendances
     service_dependencies.append("cash_service")
     service_dependencies.append("score_service")
-    service_dependencies.append("dice_service")
+    service_dependencies.append("dices_service")
 
 # Surcharge des méthodes de BaseService
 func initialize() -> void:
@@ -79,10 +79,10 @@ func setup_dependencies(dependencies: Dictionary[String, BaseService] = {}) -> v
     else:
         Logger.log_message("game_data_service", ["service", "dependencies"], "Score service non fourni dans les dépendances", "WARNING")
     
-    if dependencies.has("dice_service"):
-        dice_service = dependencies["dice_service"]
+    if dependencies.has("dices_service"):
+        dices_service = dependencies["dices_service"]
     else:
-        Logger.log_message("game_data_service", ["service", "dependencies"], "Dice service non fourni dans les dépendances", "WARNING")
+        Logger.log_message("game_data_service", ["service", "dependencies"], "Dices service non fourni dans les dépendances", "WARNING")
 
 func start() -> void:
     if not is_initialized:
@@ -104,9 +104,9 @@ func start() -> void:
         # Connecter aux changements de score pour suivre le meilleur score
         score_service.score_changed.connect(_on_score_changed)
     
-    if dice_service:
+    if dices_service:
         # Connecter aux lancers de dés pour suivre les statistiques de dés
-        dice_service.dice_thrown.connect(_on_dice_thrown)
+        dices_service.dice_thrown.connect(_on_dice_thrown)
     
     is_started = true
     started.emit()

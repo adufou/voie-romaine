@@ -20,7 +20,7 @@ enum GameState {
 # Dépendances aux autres services
 var cash_service: CashService = null
 var score_service: ScoreService = null
-var dice_service: DiceService = null
+var dices_service: DicesService = null
 var statistics_service: StatisticsService = null
 var rules_service: RulesService = null
 var upgrades_service: UpgradesService = null
@@ -41,7 +41,7 @@ func _init():
 	# Déclarer explicitement les dépendances
 	service_dependencies.append("cash_service")
 	service_dependencies.append("score_service")
-	service_dependencies.append("dice_service")
+	service_dependencies.append("dices_service")
 	service_dependencies.append("statistics_service")
 	service_dependencies.append("rules_service")
 	service_dependencies.append("upgrades_service")
@@ -75,10 +75,10 @@ func setup_dependencies(dependencies: Dictionary[String, BaseService] = {}) -> v
 	else:
 		Logger.log_message("game_service", ["service", "dependencies"], "Score service non fourni dans les dépendances", "WARNING")
 	
-	if dependencies.has("dice_service"):
-		dice_service = dependencies["dice_service"]
+	if dependencies.has("dices_service"):
+		dices_service = dependencies["dices_service"]
 	else:
-		Logger.log_message("game_service", ["service", "dependencies"], "Dice service non fourni dans les dépendances", "WARNING")
+		Logger.log_message("game_service", ["service", "dependencies"], "Dices service non fourni dans les dépendances", "WARNING")
 	
 	if dependencies.has("statistics_service"):
 		statistics_service = dependencies["statistics_service"]
@@ -226,13 +226,13 @@ func end_game() -> void:
 
 ## Réinitialise les dés en fonction des améliorations
 func reset_dice() -> void:
-	if not dice_service or not current_table:
+	if not dices_service or not current_table:
 		Logger.log_message("game_service", ["game", "dice"], "Impossible de réinitialiser les dés: services requis manquants", "WARNING")
 		return
 	
 	# Supprimer tous les dés existants
-	for dice in dice_service.get_dices():
-		dice_service.remove_dice(dice)
+	for dice in dices_service.get_dices():
+		dices_service.remove_dice(dice)
 	
 	# Déterminer le nombre de dés en fonction des améliorations
 	current_dice_count = 1
@@ -241,7 +241,7 @@ func reset_dice() -> void:
 	
 	# Créer les nouveaux dés
 	for i in range(current_dice_count):
-		dice_service.add_dice()
+		dices_service.add_dice()
 	
 	Logger.log_message("game_service", ["game", "dice"], "%d dés créés" % current_dice_count, "DEBUG")
 
@@ -250,19 +250,19 @@ func throw_dice() -> void:
 	if game_state != GameState.PLAYING:
 		return
 	
-	if not dice_service or not rules_service:
+	if not dices_service or not rules_service:
 		Logger.log_message("game_service", ["game", "gameplay"], "Impossible de lancer les dés: services requis manquants", "WARNING")
 		return
 	
 	Logger.log_message("game_service", ["game", "gameplay"], "Lancement des dés", "DEBUG")
 	
 	# Lancer tous les dés
-	dice_service.throw_dices()
+	dices_service.throw_dices()
 	
 	# Attendre que les dés s'arrêtent de rouler et récupérer les valeurs
 	await get_tree().create_timer(1.0).timeout
 	
-	var dice_values = dice_service.get_dice_values()
+	var dice_values = dices_service.get_dice_values()
 	if dice_values.is_empty():
 		return
 	

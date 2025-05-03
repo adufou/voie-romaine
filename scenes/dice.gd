@@ -97,7 +97,7 @@ func win():
 	
 func lose():
 	pop_up_message("LOSE")
-	Services.dice_service.remove_dice(self)
+	Services.dices_service.remove_dice(self)
 	queue_free()
 
 func on_throw_lose():

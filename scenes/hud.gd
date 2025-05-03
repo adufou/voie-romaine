@@ -12,9 +12,6 @@ func on_cash_changed(new_cash: int):
 func on_score_changed(new_score: int):
 	%Score.text = str(new_score)
 
-func _on_spawn_dice_button_pressed() -> void:
-	Services.dices_service.add_dice()
-
 func _on_throw_dices_button_pressed() -> void:
 	Services.dices_service.throw_dices()
 
@@ -26,3 +23,7 @@ func _on_open_shop_button_pressed() -> void:
 func _on_close_shop_button_pressed() -> void:
 	%ShopPanel.hide()
 	%InGameHUD.show()
+
+
+func _on_add_dice_button_pressed() -> void:
+	Services.dices_service.add_dice()
