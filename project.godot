@@ -17,6 +17,7 @@ config/icon="res://assets/icon.svg"
 
 [autoload]
 
+Logger="*res://autoload/logger.gd"
 Services="*res://autoload/services.gd"
 
 [display]

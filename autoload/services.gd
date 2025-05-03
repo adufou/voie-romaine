@@ -61,7 +61,7 @@ func _ready() -> void:
 
 # Étape 1: Création des services
 func _create_services() -> void:
-	print("Création des services...")
+	Logger.info(["services"], "Création des services...")
 	
 	# Services existants (pour la rétrocompatibilité)
 	cash = Cash.new()

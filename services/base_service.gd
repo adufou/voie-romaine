@@ -131,27 +131,21 @@ func load_save_data(data: Dictionary) -> bool:
 ## Log avec niveau - utilitaire pour le débogage avec groupement
 ## @param groups: Tableau de groupes de log (ex: ["currency", "transaction"])
 ## @param message: Message à journaliser
-## @param criticality: Niveau de criticité (DEBUG, INFO, WARNING, ERROR), défaut à ERROR
+## @param criticality: Niveau de criticité (DEBUG, INFO, WARNING, ERROR), défaut à DEBUG
 func log_message(groups: Array[String], message: String, criticality: String = "DEBUG") -> void:
-	# Construction du préfixe avec les groupes et le nom du service
-	var groups_text = ""
-	if not groups.is_empty():
-		groups_text = "[" + "]".join(groups) + "] "
-	else:
-		groups_text = "[NO_GROUP] "
+	# Ajouter automatiquement le nom du service comme premier groupe
+	var service_groups: Array[String] = [service_name]
+	service_groups.append_array(groups)
 	
-	var prefix = "[%s] %s%s: " % [criticality, groups_text, service_name]
-	
-	# Journalisation selon le niveau de criticité
+	# Utiliser l'autoload Logger directement
 	match criticality:
 		"DEBUG":
-			if OS.is_debug_build():
-				print(prefix + message)
+			Logger.debug(service_groups, message)
 		"INFO":
-			print(prefix + message)
+			Logger.info(service_groups, message)
 		"WARNING":
-			push_warning(prefix + message)
+			Logger.warning(service_groups, message)
 		"ERROR":
-			push_error(prefix + message)
+			Logger.error(service_groups, message)
 		_:
-			push_error(prefix + message)
+			Logger.debug(service_groups, message)

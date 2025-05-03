@@ -59,6 +59,10 @@ La structure de base a été implémentée, mais les tests complets seront réal
 - ARCH-04: Système de sauvegarde/chargement (tests de persistance)
 - ARCH-05: Intégration des systèmes existants (tests d'intégration)
 
+## Corrections et améliorations
+
+- **03/05/2025**: Correction d'un bug de typage dans la méthode `log_message()`. Le variable `service_groups` a été explicitement typée comme `Array[String]` pour correspondre au type attendu par les méthodes de Logger.
+
 ## Prochaines étapes
 
 Les prochaines étapes pour compléter l'architecture sont:

@@ -169,15 +169,19 @@ func _on_score_changed(new_score: int) -> void:
 **Dépend de :** ARCH-03  
 **Estimation :** 3 heures  
 **Sources :** `implementation_game_manager.md`
+**Statut :** ✅ Terminée
 
 ### Description
 Mettre en place un système de logs et de diagnostic pour faciliter le débogage pendant le développement et suivre les erreurs en production.
 
 ### Critères de validation
-- [ ] Différents niveaux de log (DEBUG, INFO, WARNING, ERROR)
-- [ ] Logs vers la console et/ou fichier
-- [ ] Système de catégories pour filtrer les logs
-- [ ] Interface pour consulter les logs en jeu (développement uniquement)
+- [x] Différents niveaux de log (DEBUG, INFO, WARNING, ERROR)
+- [x] Logs vers la console et/ou fichier
+- [x] Système de catégories pour filtrer les logs
+- [x] Interface pour consulter les logs en jeu (développement uniquement)
+
+### Résultat
+La documentation complète se trouve dans `_todo_/_tasks_infos_/ARCH-06_systeme_enregistrement_diagnostic.md`.
 
 ### Notes techniques
 Créer une classe utilitaire `Logger` accessible via le singleton Services pour centraliser la gestion des logs.
