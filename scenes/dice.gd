@@ -22,31 +22,46 @@ var tries: int = -1: # -1 => Infinite
 		%Tries.text = tries_text
 		tries = new_value
 
+var is_rolling: bool = false
+
 func _ready() -> void:
 	# Connexion aux signaux du RulesService
 	Services.rules_service.goal_achieved.connect(_on_goal_achieved)
 	Services.rules_service.beugnette_triggered.connect(_on_beugnette_triggered)
 	Services.rules_service.super_beugnette_triggered.connect(_on_super_beugnette_triggered)
 	
-	# On cache la valeur au début
-	_show_value_display(false)
+	show_dice_roll(false)
 	reset()
 
 func set_slot_id(id: int) -> void:
 	slot_id = id
 
+func show_dice_roll(rolling: bool) -> void:
+	is_rolling = rolling
+	%Sprite2D.visible = rolling or not rolling # Toujours affiché dans les deux cas (adapter si besoin)
+	%Value.visible = true
+	%AnimatedSprite2D.visible = false
+	
+var roll_duration: float = 0.5
+var roll_elapsed: float = 0.0
+var roll_tick: float = 0.0
+var roll_interval: float = 0.03
+var roll_interval_max: float = 0.25
+
 func throw():
-	# Afficher l'animation, cacher le Sprite2D et le Label
-	_show_value_display(false)
-	%AnimatedSprite2D.play("throw")
-	%ThrowRollTimer.start()
+	# On commence le roulement
+	show_dice_roll(true)
+	roll_elapsed = 0.0
+	roll_tick = 0.0
+	roll_interval = 0.03
+	%ThrowRollTimer.start(roll_duration)
 
 func set_value():
-	# Cacher l'animation, afficher le Sprite2D et le Label
-	_show_value_display(true)
+	# Arrêter le roulement et afficher la valeur finale
+	show_dice_roll(false)
 
 	# Utiliser DiceSyntaxService pour le lancer de dé
-	value = Services.dice_syntax_service.roll_die(6)
+	value = Services.dice_syntax_service.roll_die(goal)
 	
 	# Mettre à jour le Sprite2D et le Label
 	%Sprite2D.visible = true
@@ -66,6 +81,22 @@ func set_value():
 
 func _on_timer_timeout() -> void:
 	set_value()
+
+func _process(delta: float) -> void:
+	if is_rolling:
+		update_dice_roll(delta)
+
+# Fonction dédiée pour gérer le ralentissement progressif du roll
+func update_dice_roll(delta: float) -> void:
+	roll_elapsed += delta
+	roll_tick += delta
+	var t = clamp(roll_elapsed / roll_duration, 0, 1)
+	roll_interval = lerp(0.03, roll_interval_max, t * t)
+	if roll_tick >= roll_interval:
+		roll_tick = 0.0
+		var max_value = goal if goal > 0 else 6
+		var random_value = randi_range(1, max_value)
+		%Value.text = str(random_value)
 
 # Traite le résultat du lancer calculé par le RulesService
 func process_throw_result(result: ThrowResult) -> void:
