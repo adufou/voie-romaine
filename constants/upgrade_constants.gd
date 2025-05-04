@@ -1,0 +1,10 @@
+class_name UpgradeConstants
+
+enum UpgradeType {
+	THROW_SPEED,
+	CRITICAL_CHANCE,
+	REWARD_MULTIPLIER,
+	AUTO_THROW,
+	NUMBER_OF_FACES,
+	MULTI_DICE
+}

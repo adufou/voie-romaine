@@ -27,3 +27,7 @@ func _on_close_shop_button_pressed() -> void:
 
 func _on_add_dice_button_pressed() -> void:
 	Services.dices_service.add_dice()
+
+
+func _on_add_face_button_pressed() -> void:
+	Services.upgrades_service.purchase_upgrade(UpgradeConstants.UpgradeType.NUMBER_OF_FACES)

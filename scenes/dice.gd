@@ -4,15 +4,14 @@ class_name Dice
 
 @export var pop_up_message_scene: PackedScene # Make it a service if used in several places 
 
+var number_of_faces: int = Services.upgrades_service.get_upgrade_effect(UpgradeConstants.UpgradeType.NUMBER_OF_FACES)
+
 var value: int
 var slot_id: int = -1  # ID du slot attribué par le DicesService
 
 # Variables d'affichage synchronisées avec le RulesService
-var goal: int = 6:
-	set(new_value):
-		%Goal.text = str(new_value)
-		goal = new_value
-		
+var goal: int = number_of_faces
+
 var tries: int = -1: # -1 => Infinite
 	set(new_value):
 		var tries_text = "∞"
@@ -29,9 +28,20 @@ func _ready() -> void:
 	Services.rules_service.goal_achieved.connect(_on_goal_achieved)
 	Services.rules_service.beugnette_triggered.connect(_on_beugnette_triggered)
 	Services.rules_service.super_beugnette_triggered.connect(_on_super_beugnette_triggered)
+
+	Services.upgrades_service.upgrade_effect_changed.connect(_on_upgrade_effect_changed)
 	
+	Logger.log_message("dice", ["dice", "debug"], "Nombre de faces: %d" % number_of_faces, "DEBUG")
+	Logger.log_message("dice", ["dice", "debug"], "But: %d" % goal, "DEBUG")
+
 	show_dice_roll(false)
 	reset()
+
+func _on_upgrade_effect_changed(upgrade_type: UpgradeConstants.UpgradeType, new_effect: float) -> void:
+	if upgrade_type == UpgradeConstants.UpgradeType.NUMBER_OF_FACES:
+		# Met à jour le nombre de faces du dé
+		number_of_faces = new_effect
+		goal = number_of_faces
 
 func set_slot_id(id: int) -> void:
 	slot_id = id

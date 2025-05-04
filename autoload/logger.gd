@@ -105,6 +105,7 @@ func _log(groups: Array[String], message: String, level: int) -> void:
 	# Ajouter au buffer pour l'affichage en jeu
 	buffer.append(log_entry)
 	if buffer.size() > 1000:  # Limite pour éviter une utilisation mémoire excessive
+		print("[Logger] Buffer limité, supprimé %d logs" % (buffer.size() - 1000))
 		buffer.pop_front()
 	
 	# Émission du signal pour l'interface

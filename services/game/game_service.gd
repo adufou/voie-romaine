@@ -236,8 +236,8 @@ func reset_dice() -> void:
 	
 	# Déterminer le nombre de dés en fonction des améliorations
 	current_dice_count = 1
-	if upgrades_service and upgrades_service.is_upgrade_unlocked("multi_dice"):
-		current_dice_count += int(upgrades_service.get_upgrade_effect("multi_dice"))
+	if upgrades_service and upgrades_service.is_upgrade_unlocked(UpgradeConstants.UpgradeType.MULTI_DICE):
+		current_dice_count += int(upgrades_service.get_upgrade_effect(UpgradeConstants.UpgradeType.MULTI_DICE))
 	
 	# Créer les nouveaux dés
 	for i in range(current_dice_count):
@@ -298,7 +298,7 @@ func throw_dice() -> void:
 ## Active/désactive le lancer automatique de dés
 func toggle_auto_throw(enabled: bool = true) -> void:
 	# Vérifier si l'auto-throw est débloqué
-	if enabled and upgrades_service and not upgrades_service.is_upgrade_unlocked("auto_throw"):
+	if enabled and upgrades_service and not upgrades_service.is_upgrade_unlocked(UpgradeConstants.UpgradeType.AUTO_THROW):
 		Logger.log_message("game_service", ["game", "gameplay"], "Tentative d'activer le lancer automatique alors qu'il n'est pas débloqué", "WARNING")
 		return
 	
@@ -332,31 +332,31 @@ func _on_super_beugnette_triggered() -> void:
 	
 	# Extensions futures possibles ici
 
-func _on_upgrade_purchased(upgrade_id: String, new_level: int) -> void:
-	Logger.log_message("game_service", ["game", "callback"], "Amélioration %s achetée (niveau %d)" % [upgrade_id, new_level], "DEBUG")
+func _on_upgrade_purchased(upgrade_type: UpgradeConstants.UpgradeType, new_level: int) -> void:
+	Logger.log_message("game_service", ["game", "callback"], "Amélioration %s achetée (niveau %d)" % [upgrade_type, new_level], "DEBUG")
 	
 	# Appliquer les effets des améliorations
-	match upgrade_id:
-		"throw_speed":
+	match upgrade_type:
+		UpgradeConstants.UpgradeType.THROW_SPEED:
 			# Augmenter la vitesse de lancer (réduire l'intervalle)
 			if upgrades_service:
-				var speed_boost = upgrades_service.get_upgrade_effect(upgrade_id)
+				var speed_boost = upgrades_service.get_upgrade_effect(upgrade_type)
 				set_auto_throw_interval(max(0.1, 1.0 / (1.0 + speed_boost)))
 		
-		"multi_dice":
+		UpgradeConstants.UpgradeType.MULTI_DICE:
 			# Mettre à jour le nombre de dés
 			reset_dice()
 		
-		"critical_chance":
+		UpgradeConstants.UpgradeType.CRITICAL_CHANCE:
 			# Mettre à jour la chance critique dans les règles
 			if rules_service and upgrades_service:
-				var crit_chance = upgrades_service.get_upgrade_effect(upgrade_id)
+				var crit_chance = upgrades_service.get_upgrade_effect(upgrade_type)
 				rules_service.set_rule("critical_chance", crit_chance)
 		
-		"reward_multiplier":
+		UpgradeConstants.UpgradeType.REWARD_MULTIPLIER:
 			# Mettre à jour le multiplicateur de récompense dans les règles
 			if rules_service and upgrades_service:
-				var multiplier = 1.0 + upgrades_service.get_upgrade_effect(upgrade_id)
+				var multiplier = 1.0 + upgrades_service.get_upgrade_effect(upgrade_type)
 				rules_service.set_rule("reward_multiplier", multiplier)
 
 # Gestion des données et persistance

@@ -7,7 +7,7 @@ var table
 var hud
 
 func _ready() -> void:
-	Logger.add_filter("dice", Logger.LogLevel.DEBUG)
+	#Logger.add_filter("dice", Logger.LogLevel.DEBUG)
 	
 	# S'assurer que le noeud LoadingScreen est prêt avant de connecter le signal
 	call_deferred("_connect_loading_screen_signal")

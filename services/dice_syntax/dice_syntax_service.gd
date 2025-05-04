@@ -37,7 +37,7 @@ func start() -> void:
     started.emit()
 
 # Méthode simple pour obtenir une valeur de dé
-func roll_die(faces: int = 6) -> int:
+func roll_die(faces) -> int:
     var result = _dice_syntax.roll("d" + str(faces), RandomNumberGenerator.new(), _dice_regex)
     if result.error:
         Logger.log_message("dice_syntax_service", ["dice", "roll"], "Erreur lors du lancer de dé: " + str(result.msg), "ERROR")

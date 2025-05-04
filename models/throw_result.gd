@@ -12,10 +12,10 @@ var beugnette: bool = false
 var super_beugnette: bool = false
 
 ## Le nouveau but après ce lancer
-var new_goal: int = 6
+var new_goal: int
 
 ## Le nombre d'essais restants après ce lancer
-var new_attempts: int = 6
+var new_attempts: int
 
 ## La récompense obtenue (si succès)
 var reward: int = 0
@@ -26,10 +26,8 @@ var critical: bool = false
 ## La valeur du dé qui a été lancé
 var dice_value: int = 0
 
-func _init(p_success: bool = false, p_new_goal: int = 6, p_new_attempts: int = 6) -> void:
-	success = p_success
-	new_goal = p_new_goal
-	new_attempts = p_new_attempts
+## Nombre de faces du dé
+var number_of_faces: int
 
 ## Crée un objet ThrowResult à partir d'un dictionnaire
 static func from_dictionary(dict: Dictionary) -> ThrowResult:
@@ -51,6 +49,8 @@ static func from_dictionary(dict: Dictionary) -> ThrowResult:
 		result.critical = dict.critical
 	if dict.has("dice_value"):
 		result.dice_value = dict.dice_value
+	if dict.has("number_of_faces"):
+		result.number_of_faces = dict.number_of_faces
 		
 	return result
 
@@ -64,16 +64,17 @@ func to_dictionary() -> Dictionary:
 		"new_attempts": new_attempts,
 		"reward": reward,
 		"critical": critical,
-		"dice_value": dice_value
+		"dice_value": dice_value,
+		"number_of_faces": number_of_faces
 	}
 
 ## Vérifie si le résultat indique une victoire finale (dernier but atteint)
 func is_final_win() -> bool:
-	return success and new_goal == 6 and success
+	return success and new_goal == number_of_faces and success
 
 ## Vérifie si le résultat indique un échec final (plus d'essais sur but 6)
 func is_final_lose() -> bool:
-	return not success and new_attempts <= 0 and new_goal >= 6
+	return not success and new_attempts <= 0 and new_goal >= number_of_faces
 
 ## Affiche une représentation textuelle du résultat pour le débogage
 func _to_string() -> String:

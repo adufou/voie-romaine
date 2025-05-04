@@ -13,7 +13,7 @@ signal dice_thrown()
 var table: Node = null          # Référence à la table de jeu
 
 # Données internes
-const MAX_DICES = 32           # Nombre maximum de dés autorisés
+const MAX_DICES = 32           # Nombre maximum de dés autorisés (limité par la scène, pas une amélioration)
 var dices: Dictionary[int, Dice] = {}     # Dictionnaire des dés actifs [slot_id: int] -> Dice
 var dice_results: Dictionary[int, ThrowResult] = {}  # Résultats des dés [slot_id: int] -> ThrowResult
 

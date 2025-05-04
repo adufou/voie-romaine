@@ -88,8 +88,6 @@ func _create_services() -> void:
 	add_child(score_service)
 	add_child(dices_service)
 	add_child(dice_syntax_service)
-	
-	# Ajouter les nouveaux services
 	add_child(statistics_service)
 	add_child(rules_service)
 	add_child(table_service)
@@ -143,15 +141,20 @@ func _setup_dependencies() -> void:
 		"dices_service": dices_service
 	})
 	
-	# Les autres services seront configurés dans une future tâche
-
-	rules_service.setup_dependencies({"dices_service": dices_service})
-	
+	# Configuration des dépendances pour UpgradesService
 	upgrades_service.setup_dependencies({
 		"cash_service": cash_service,
 		"score_service": score_service
 	})
+
+	# Configuration des dépendances pour RulesService
+	rules_service.setup_dependencies({
+		"cash_service": cash_service,
+		"score_service": score_service,
+		"upgrades_service": upgrades_service
+	})
 	
+	# Configuration des dépendances pour GameService
 	game_service.setup_dependencies({
 		"dices_service": dices_service,
 		"rules_service": rules_service,
