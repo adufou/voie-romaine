@@ -1,8 +1,9 @@
-[gd_scene load_steps=17 format=3 uid="uid://bivv5cykxj7b5"]
+[gd_scene load_steps=18 format=3 uid="uid://bivv5cykxj7b5"]
 
 [ext_resource type="Texture2D" uid="uid://rn6k15wnjjkw" path="res://atlas/dices_atlas.tres" id="1_jtd8f"]
 [ext_resource type="Script" uid="uid://dfk4b8hkp5vym" path="res://scenes/dice.gd" id="1_mg5ex"]
 [ext_resource type="PackedScene" uid="uid://ompdxamo7dsk" path="res://scenes/pop_up_message.tscn" id="2_oi81l"]
+[ext_resource type="Texture2D" uid="uid://bw4it7ioh8qkm" path="res://assets/dice.png" id="4_o1ht6"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_x7yda"]
 atlas = ExtResource("1_jtd8f")
@@ -108,8 +109,28 @@ pop_up_message_scene = ExtResource("2_oi81l")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 unique_name_in_owner = true
+scale = Vector2(2, 2)
 sprite_frames = SubResource("SpriteFrames_5b4eb")
 animation = &"white"
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+texture = ExtResource("4_o1ht6")
+
+[node name="Value" type="Label" parent="."]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 16
+text = "123"
+horizontal_alignment = 1
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
 
 [node name="ThrowRollTimer" type="Timer" parent="."]
 unique_name_in_owner = true

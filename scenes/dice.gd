@@ -28,23 +28,33 @@ func _ready() -> void:
 	Services.rules_service.beugnette_triggered.connect(_on_beugnette_triggered)
 	Services.rules_service.super_beugnette_triggered.connect(_on_super_beugnette_triggered)
 	
+	# On cache la valeur au début
+	_show_value_display(false)
 	reset()
 
 func set_slot_id(id: int) -> void:
 	slot_id = id
 
 func throw():
+	# Afficher l'animation, cacher le Sprite2D et le Label
+	_show_value_display(false)
 	%AnimatedSprite2D.play("throw")
 	%ThrowRollTimer.start()
 
 func set_value():
-	%AnimatedSprite2D.animation = "white"
-	%AnimatedSprite2D.pause()
-	
+	# Cacher l'animation, afficher le Sprite2D et le Label
+	_show_value_display(true)
+
 	# Utiliser DiceSyntaxService pour le lancer de dé
 	value = Services.dice_syntax_service.roll_die(6)
-	%AnimatedSprite2D.frame = value - 1
 	
+	# Mettre à jour le Sprite2D et le Label
+	%Sprite2D.visible = true
+	%Value.visible = true
+	%AnimatedSprite2D.visible = false
+	%Value.text = str(value)
+	# (optionnel) changer la texture du sprite selon la valeur si besoin
+
 	# Déléguer la résolution du lancer au RulesService
 	var result: ThrowResult = Services.rules_service.resolve_throw(value)
 	
@@ -114,3 +124,9 @@ func pop_up_message(message: String):
 
 func _on_throw_info_timer_timeout() -> void:
 	%ThrowInfo.text = ""
+
+# Affiche ou non la valeur du dé (Sprite2D + Label), cache ou non l'animation
+func _show_value_display(show: bool) -> void:
+	%Sprite2D.visible = show
+	%Value.visible = show
+	%AnimatedSprite2D.visible = not show
