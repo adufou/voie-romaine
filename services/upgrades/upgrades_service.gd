@@ -51,18 +51,18 @@ var upgrade_definitions: Dictionary[UpgradeConstants.UpgradeType, Dictionary] = 
 	UpgradeConstants.UpgradeType.MULTI_DICE: {
 		"name": "Dés multiples",
 		"description": "Permet d'utiliser plusieurs dés simultanément",
-		"base_cost": 1000,
+		"base_cost": 100,
 		"base_effect": 1,
-		"cost_multiplier": 5.0,
+		"cost_multiplier": 2.5,
 		"effect_per_level": 1.0,  # +1 dé par niveau
 		"max_level": 10
 	},
 	UpgradeConstants.UpgradeType.NUMBER_OF_FACES: {
 		"name": "Nombre de faces",
 		"description": "Augmente le nombre de faces des dés",
-		"base_cost": 25,
+		"base_cost": 5,
 		"base_effect": 1,
-		"cost_multiplier": 5.0,
+		"cost_multiplier": 2.5,
 		"effect_per_level": 1.0,  # +1 face par niveau
 		"max_level": 100
 	}

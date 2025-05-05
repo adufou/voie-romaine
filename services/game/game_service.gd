@@ -117,25 +117,24 @@ func start() -> void:
 	Logger.log_message("game_service", ["debug"], "game_service démarrage en cours...", "DEBUG")
 	Logger.log_message("game_service", ["service", "start"], "Démarrage", "INFO")
 	
-	# Skip signal connection for now to debug
-	Logger.log_message("game_service", ["debug"], "Skipping signal connections for troubleshooting", "DEBUG")
-	# Connecter aux signaux des autres services - DISABLED FOR DEBUGGING
-	#if rules_service:
-	#	Logger.log_message("game_service", ["service", "start"], "Connexion aux signaux de rules_service", "INFO")
-	#	# Vérifications pour éviter les erreurs
-	#	if rules_service.has_signal("goal_achieved") and has_method("_on_goal_achieved"):
-	#		rules_service.goal_achieved.connect(_on_goal_achieved)
-	#	
-	#	if rules_service.has_signal("beugnette_triggered") and has_method("_on_beugnette_triggered"):
-	#		rules_service.beugnette_triggered.connect(_on_beugnette_triggered)
-	#	
-	#	if rules_service.has_signal("super_beugnette_triggered") and has_method("_on_super_beugnette_triggered"):
-	#		rules_service.super_beugnette_triggered.connect(_on_super_beugnette_triggered)
-	#
-	#if upgrades_service:
-	#	Logger.log_message("game_service", ["service", "start"], "Connexion aux signaux de upgrades_service", "INFO")
-	#	if upgrades_service.has_signal("upgrade_purchased") and has_method("_on_upgrade_purchased"):
-	#		upgrades_service.upgrade_purchased.connect(_on_upgrade_purchased)
+	# Connecter aux signaux des autres services
+	Logger.log_message("game_service", ["debug"], "Configuration des connexions aux signaux", "DEBUG")
+	if rules_service:
+		Logger.log_message("game_service", ["service", "start"], "Connexion aux signaux de rules_service", "INFO")
+		# Vérifications pour éviter les erreurs
+		if rules_service.has_signal("goal_achieved") and has_method("_on_goal_achieved"):
+			rules_service.goal_achieved.connect(_on_goal_achieved)
+		
+		if rules_service.has_signal("beugnette_triggered") and has_method("_on_beugnette_triggered"):
+			rules_service.beugnette_triggered.connect(_on_beugnette_triggered)
+		
+		if rules_service.has_signal("super_beugnette_triggered") and has_method("_on_super_beugnette_triggered"):
+			rules_service.super_beugnette_triggered.connect(_on_super_beugnette_triggered)
+	
+	if upgrades_service:
+		Logger.log_message("game_service", ["service", "start"], "Connexion aux signaux de upgrades_service", "INFO")
+		if upgrades_service.has_signal("upgrade_purchased") and has_method("_on_upgrade_purchased"):
+			upgrades_service.upgrade_purchased.connect(_on_upgrade_purchased)
 	
 	# Debug game state initialization
 	Logger.log_message("game_service", ["debug"], "Avant _set_game_state", "DEBUG")
@@ -344,8 +343,9 @@ func _on_upgrade_purchased(upgrade_type: UpgradeConstants.UpgradeType, new_level
 				set_auto_throw_interval(max(0.1, 1.0 / (1.0 + speed_boost)))
 		
 		UpgradeConstants.UpgradeType.MULTI_DICE:
-			# Mettre à jour le nombre de dés
-			reset_dice()
+			# Ajouter un nouveau dé quand on achète l'upgrade
+			if dices_service:
+				dices_service.add_dice()
 		
 		UpgradeConstants.UpgradeType.CRITICAL_CHANCE:
 			# Mettre à jour la chance critique dans les règles
