@@ -5,9 +5,11 @@ class_name RulesService
 # Signaux pour les événements de règles
 signal rule_changed(rule_name, new_value)
 signal goal_achieved(goal_number, reward)
+signal goal_changed(goal_number)
 signal beugnette_triggered(goal_number)
 signal super_beugnette_triggered()
 signal sequence_completed(total_reward)  # Signal émis quand une séquence complète est terminée
+signal remaining_attempts_changed(new_attempts)
 
 # Dépendances de 
 var cash_service: CashService = null
@@ -27,8 +29,16 @@ var rules_config = {
 }
 
 # État du jeu actuel
-var current_goal: int = 1
-var remaining_attempts: int = -1
+var current_goal: int = 1:
+	set(new_goal):
+		goal_changed.emit(new_goal)
+		current_goal = new_goal
+	
+var remaining_attempts: int = -1:
+	set(new_attempts):
+		remaining_attempts_changed.emit(new_attempts)
+		remaining_attempts = new_attempts
+			
 
 func _init():
 	service_name = "rules_service"

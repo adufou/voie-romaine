@@ -29,18 +29,43 @@ metadata/_edit_use_anchors_ = true
 [node name="HBoxContainer" type="HBoxContainer" parent="InGameHUD"]
 layout_mode = 2
 
-[node name="VBoxContainerLeft" type="VBoxContainer" parent="InGameHUD/HBoxContainer"]
+[node name="AspectRatioContainer" type="VBoxContainer" parent="InGameHUD/HBoxContainer"]
 layout_mode = 2
 
-[node name="Score" type="Label" parent="InGameHUD/HBoxContainer/VBoxContainerLeft"]
+[node name="VBoxContainerLeft" type="VBoxContainer" parent="InGameHUD/HBoxContainer/AspectRatioContainer"]
+layout_mode = 2
+
+[node name="Score" type="Label" parent="InGameHUD/HBoxContainer/AspectRatioContainer/VBoxContainerLeft"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "0"
 
-[node name="Cash" type="Label" parent="InGameHUD/HBoxContainer/VBoxContainerLeft"]
+[node name="Cash" type="Label" parent="InGameHUD/HBoxContainer/AspectRatioContainer/VBoxContainerLeft"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "$0"
+
+[node name="AspectRatioContainer" type="AspectRatioContainer" parent="InGameHUD/HBoxContainer/AspectRatioContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="InGameHUD/HBoxContainer/AspectRatioContainer"]
+layout_mode = 2
+
+[node name="Attempts" type="Label" parent="InGameHUD/HBoxContainer/AspectRatioContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Attemps: "
+
+[node name="Goal" type="Label" parent="InGameHUD/HBoxContainer/AspectRatioContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Goal: "
+
+[node name="Faces" type="Label" parent="InGameHUD/HBoxContainer/AspectRatioContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Faces: "
 
 [node name="ContainerMiddle" type="AspectRatioContainer" parent="InGameHUD/HBoxContainer"]
 layout_mode = 2
