@@ -220,7 +220,7 @@ func resolve_throw(dice_value: int) -> ThrowResult:
 		if dice_value == upgrades_service.get_upgrade_effect(UpgradeConstants.UpgradeType.NUMBER_OF_FACES) and current_goal == 1 and result.new_attempts <= 0:
 			result.super_beugnette = true
 			result.new_goal = upgrades_service.get_upgrade_effect(UpgradeConstants.UpgradeType.NUMBER_OF_FACES)
-			result.new_attempts = rules_config["goal_attempts"][upgrades_service.get_upgrade_effect(UpgradeConstants.UpgradeType.NUMBER_OF_FACES)]
+			result.new_attempts = rules_config["goal_attempts"][int(upgrades_service.get_upgrade_effect(UpgradeConstants.UpgradeType.NUMBER_OF_FACES))]
 			
 			super_beugnette_triggered.emit()
 			Logger.log_message("rules_service", ["rules", "gameplay"], "Super Beugnette! Retour au but 6 avec %d essais" % 

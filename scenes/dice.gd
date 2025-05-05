@@ -89,6 +89,17 @@ func set_value():
 	
 	process_throw_result(result)
 
+# Fonction pour assigner une valeur aléatoire au dé sans déclencher l'animation de roll
+func set_random_value():
+	# Générer une valeur aléatoire dans la plage possible
+	value = randi_range(1, int(number_of_faces))
+	
+	# Mettre à jour l'affichage
+	%Sprite2D.visible = true
+	%Value.visible = true
+	%AnimatedSprite2D.visible = false
+	%Value.text = str(value)
+
 func _on_timer_timeout() -> void:
 	set_value()
 
@@ -135,7 +146,8 @@ func reset():
 	goal = game_state.current_goal
 	tries = game_state.remaining_attempts
 	
-	throw()
+	# Attribuer une valeur aléatoire au dé au spawn
+	set_random_value()
 
 func lose():
 	pop_up_message("LOSE")

@@ -51,7 +51,7 @@ var upgrade_definitions: Dictionary[UpgradeConstants.UpgradeType, Dictionary] = 
 	UpgradeConstants.UpgradeType.MULTI_DICE: {
 		"name": "Dés multiples",
 		"description": "Permet d'utiliser plusieurs dés simultanément",
-		"base_cost": 100,
+		"base_cost": 10,
 		"base_effect": 1,
 		"cost_multiplier": 2.5,
 		"effect_per_level": 1.0,  # +1 dé par niveau
