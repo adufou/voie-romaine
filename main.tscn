@@ -1,14 +1,76 @@
-[gd_scene load_steps=5 format=3 uid="uid://bp58kbvdtuqjq"]
+[gd_scene load_steps=11 format=3 uid="uid://bp58kbvdtuqjq"]
 
 [ext_resource type="Script" uid="uid://dly0asj8m5a7" path="res://main.gd" id="1_h2yge"]
 [ext_resource type="PackedScene" uid="uid://cly10iqix7n0j" path="res://scenes/loading_screen.tscn" id="2_1bvp3"]
 [ext_resource type="PackedScene" uid="uid://c1e2lx06a1phf" path="res://scenes/table.tscn" id="2_lquwl"]
 [ext_resource type="PackedScene" uid="uid://73jt52qmeu7p" path="res://scenes/hud.tscn" id="3_7mycd"]
+[ext_resource type="Shader" uid="uid://d3ahjjyxo5ww8" path="res://shaders/chromatic_abberation.gdshader" id="5_lquwl"]
+[ext_resource type="Shader" uid="uid://ca00f4ensaxcp" path="res://shaders/crt_lines.gdshader" id="6_7mycd"]
+[ext_resource type="Shader" uid="uid://dawnb0hd48656" path="res://shaders/distortion_circular.gdshader" id="7_272bh"]
 
-[node name="Main" type="Node"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_lquwl"]
+shader = ExtResource("6_7mycd")
+shader_parameter/crt_line_width = 0.02
+shader_parameter/crt_line_intensity = 0.3
+shader_parameter/crt_line_speed = 0.1
+shader_parameter/crt_line_sharpness = 5.0
+shader_parameter/time = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5vw27"]
+shader = ExtResource("7_272bh")
+shader_parameter/distortion_strength = 0.05
+shader_parameter/distortion_radius = 0.7
+shader_parameter/distortion_exponent = 2.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7mycd"]
+shader = ExtResource("5_lquwl")
+shader_parameter/abberation_start = 0.2
+shader_parameter/abberation_max_offset = 4.0
+
+[node name="Main" type="Node2D"]
 script = ExtResource("1_h2yge")
 table_scene = ExtResource("2_lquwl")
 hud_scene = ExtResource("3_7mycd")
 
 [node name="LoadingScreen" parent="." instance=ExtResource("2_1bvp3")]
 unique_name_in_owner = true
+
+[node name="Camera2D" type="Camera2D" parent="."]
+anchor_mode = 0
+
+[node name="GameContainer" type="CanvasLayer" parent="Camera2D"]
+layer = 0
+
+[node name="EffectsLayer" type="CanvasLayer" parent="Camera2D"]
+
+[node name="BackBufferCopy" type="BackBufferCopy" parent="Camera2D/EffectsLayer"]
+position = Vector2(571, 297)
+scale = Vector2(6.87, 4.4)
+copy_mode = 2
+
+[node name="CrtLinesColorRect" type="ColorRect" parent="Camera2D/EffectsLayer"]
+material = SubResource("ShaderMaterial_lquwl")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="DistortionColorRect" type="ColorRect" parent="Camera2D/EffectsLayer"]
+material = SubResource("ShaderMaterial_5vw27")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ChromaticAbberationColorRect" type="ColorRect" parent="Camera2D/EffectsLayer"]
+material = SubResource("ShaderMaterial_7mycd")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

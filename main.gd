@@ -130,9 +130,8 @@ func _initialize_game() -> void:
 				Logger.log_message("main", ["system", "table"], "Type de nœud non spécifique, s'assurer qu'il est visible", "INFO")
 				table.visible = true
 			
-			# Ajouter à la scène principale mais dans un endroit approprié
-			# Pour un Control, il vaut mieux l'ajouter dans un conteneur UI
-			add_child(table)
+			# Ajouter la table au GameContainer (couche de jeu)
+			$Camera2D/GameContainer.add_child(table)
 			
 			# Vérifier que la table est maintenant dans l'arbre de scène
 			if table.is_inside_tree():
@@ -140,17 +139,18 @@ func _initialize_game() -> void:
 			else:
 				Logger.log_message("main", ["system", "table"], "La table n'est pas dans l'arbre de scène après ajout", "ERROR")
 			
-			Logger.log_message("main", ["system", "table"], "Table ajoutée à la scène principale", "INFO")
+			Logger.log_message("main", ["system", "table"], "Table ajoutée au GameContainer", "INFO")
 		else:
 			Logger.log_message("main", ["system", "table"], "Impossible d'obtenir la table du service", "ERROR")
 	else:
 		Logger.log_message("main", ["system", "table"], "Service de table non trouvé", "ERROR")
 		# Fallback au cas où le service n'est pas disponible
 		table = table_scene.instantiate()
-		add_child(table)
+		$Camera2D/GameContainer.add_child(table)
 	
 	hud = hud_scene.instantiate()
-	add_child(hud)
+	# Ajouter le HUD au GameContainer également
+	$Camera2D/GameContainer.add_child(hud)
 	
 	# Additional game initialization can happen here
 	Logger.log_message("main", ["system", "loading"], "Game fully initialized!", "INFO")
