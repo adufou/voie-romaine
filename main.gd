@@ -131,7 +131,7 @@ func _initialize_game() -> void:
 				table.visible = true
 			
 			# Ajouter la table au GameContainer (couche de jeu)
-			$Camera2D/GameContainer.add_child(table)
+			%TableContainer.add_child(table)
 			
 			# Vérifier que la table est maintenant dans l'arbre de scène
 			if table.is_inside_tree():
@@ -146,11 +146,11 @@ func _initialize_game() -> void:
 		Logger.log_message("main", ["system", "table"], "Service de table non trouvé", "ERROR")
 		# Fallback au cas où le service n'est pas disponible
 		table = table_scene.instantiate()
-		$Camera2D/GameContainer.add_child(table)
+		%TableContainer.add_child(table)
 	
 	hud = hud_scene.instantiate()
 	# Ajouter le HUD au GameContainer également
-	$Camera2D/GameContainer.add_child(hud)
+	%TableContainer.add_child(hud)
 	
 	# Additional game initialization can happen here
 	Logger.log_message("main", ["system", "loading"], "Game fully initialized!", "INFO")

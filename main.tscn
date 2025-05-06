@@ -16,18 +16,18 @@ shader_parameter/crt_line_speed = 0.1
 shader_parameter/crt_line_sharpness = 5.0
 shader_parameter/time = 0.0
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7mycd"]
+shader = ExtResource("5_lquwl")
+shader_parameter/abberation_start = 0.2
+shader_parameter/abberation_max_offset = 4.0
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_5vw27"]
 shader = ExtResource("7_272bh")
 shader_parameter/distortion_strength = 0.05
 shader_parameter/distortion_radius = 0.7
 shader_parameter/distortion_exponent = 2.0
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_7mycd"]
-shader = ExtResource("5_lquwl")
-shader_parameter/abberation_start = 0.2
-shader_parameter/abberation_max_offset = 4.0
-
-[node name="Main" type="Node2D"]
+[node name="Main" type="Node"]
 script = ExtResource("1_h2yge")
 table_scene = ExtResource("2_lquwl")
 hud_scene = ExtResource("3_7mycd")
@@ -35,20 +35,11 @@ hud_scene = ExtResource("3_7mycd")
 [node name="LoadingScreen" parent="." instance=ExtResource("2_1bvp3")]
 unique_name_in_owner = true
 
-[node name="Camera2D" type="Camera2D" parent="."]
-anchor_mode = 0
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
 
-[node name="GameContainer" type="CanvasLayer" parent="Camera2D"]
-layer = 0
+[node name="CrtLinesCanvasLayer" type="CanvasLayer" parent="CanvasGroup"]
 
-[node name="EffectsLayer" type="CanvasLayer" parent="Camera2D"]
-
-[node name="BackBufferCopy" type="BackBufferCopy" parent="Camera2D/EffectsLayer"]
-position = Vector2(571, 297)
-scale = Vector2(6.87, 4.4)
-copy_mode = 2
-
-[node name="CrtLinesColorRect" type="ColorRect" parent="Camera2D/EffectsLayer"]
+[node name="CrtLinesColorRect" type="ColorRect" parent="CanvasGroup/CrtLinesCanvasLayer"]
 material = SubResource("ShaderMaterial_lquwl")
 anchors_preset = 15
 anchor_right = 1.0
@@ -57,7 +48,20 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="DistortionColorRect" type="ColorRect" parent="Camera2D/EffectsLayer"]
+[node name="ChromaticAbberationCanvasLayer" type="CanvasLayer" parent="CanvasGroup"]
+
+[node name="ChromaticAbberationColorRect" type="ColorRect" parent="CanvasGroup/ChromaticAbberationCanvasLayer"]
+material = SubResource("ShaderMaterial_7mycd")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="DistortionCanvasLayer" type="CanvasLayer" parent="CanvasGroup"]
+
+[node name="DistortionColorRect" type="ColorRect" parent="CanvasGroup/DistortionCanvasLayer"]
 material = SubResource("ShaderMaterial_5vw27")
 anchors_preset = 15
 anchor_right = 1.0
@@ -66,11 +70,8 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="ChromaticAbberationColorRect" type="ColorRect" parent="Camera2D/EffectsLayer"]
-material = SubResource("ShaderMaterial_7mycd")
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
+[node name="TableContainer" type="Control" parent="CanvasGroup"]
+unique_name_in_owner = true
+layout_mode = 3
+offset_right = 1152.0
+offset_bottom = 648.0
